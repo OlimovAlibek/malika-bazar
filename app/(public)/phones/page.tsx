@@ -8,6 +8,7 @@ type Props = {
   searchParams?: {
     query?: string;
     brand?: string;
+    focus?: string;
   };
 };
 
@@ -16,6 +17,7 @@ export default async function PhonesPage({ searchParams }: Props) {
 
   const query = searchParams?.query ?? '';
   const brand = searchParams?.brand ?? '';
+  const focus = searchParams?.focus === '1';
 
   let dbQuery = supabase
     .from('products')
@@ -58,16 +60,34 @@ export default async function PhonesPage({ searchParams }: Props) {
   return (
     <main className="min-h-screen pb-8">
       <div className="bg-gradient-to-b from-white to-gray-50 border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-slate-900 mb-3">
-            Telefonlar
-          </h1>
+        <div className="max-w-2xl mx-auto px-4 py-3">
+        <h1 className="text-lg font-bold text-slate-900 mb-1">
+  Telefonlar
+</h1>
+
+{/* Search input */}
+<form action="/phones" className="mb-2">
+  <input
+    name="query"
+    defaultValue={query}
+    autoFocus={focus}
+    placeholder={
+      focus
+        ? 'Masalan: iPhone 13, Samsung A12'
+        : 'Qidirish yoki filtrlash'
+    }
+    className="w-full border border-gray-300 rounded-xl px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500"
+  />
+  {brand && (
+    <input type="hidden" name="brand" value={brand} />
+  )}
+</form>
 
           {/* Brand filter */}
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-1 flex-wrap">
             <a
               href="/phones"
-              className={`px-4 py-2 border rounded-xl text-sm font-medium transition-all ${
+              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
                 !brand 
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
                   : 'bg-white text-slate-700 border-gray-300 hover:border-emerald-300 hover:bg-emerald-50'
@@ -77,7 +97,7 @@ export default async function PhonesPage({ searchParams }: Props) {
             </a>
             <a
               href="/phones?brand=Apple"
-              className={`px-4 py-2 border rounded-xl text-sm font-medium transition-all ${
+              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
                 brand === 'Apple'
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                   : 'bg-white text-slate-700 border-gray-300 hover:border-emerald-300 hover:bg-emerald-50'
@@ -87,13 +107,23 @@ export default async function PhonesPage({ searchParams }: Props) {
             </a>
             <a
               href="/phones?brand=Samsung"
-              className={`px-4 py-2 border rounded-xl text-sm font-medium transition-all ${
+              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
                 brand === 'Samsung'
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                   : 'bg-white text-slate-700 border-gray-300 hover:border-emerald-300 hover:bg-emerald-50'
               }`}
             >
               Samsung
+            </a>
+            <a
+              href="/phones?brand=Xiaomi"
+              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
+                brand === 'Xiaomi'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                  : 'bg-white text-slate-700 border-gray-300 hover:border-emerald-300 hover:bg-emerald-50'
+              }`}
+            >
+              Xiaomi
             </a>
           </div>
         </div>

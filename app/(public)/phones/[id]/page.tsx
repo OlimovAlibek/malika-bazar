@@ -5,6 +5,7 @@ import { publicSupabase } from '@/lib/supabase/public';
 import { formatUpdatedAt } from '@/lib/formatUpdatedAt';
 import ProductActions from '@/components/ProductActions';
 import ShareButton from '@/components/ShareButton';
+import BackButton from '@/components/BackButton';
 
 type Props = {
   params: { id: string };
@@ -102,12 +103,15 @@ export default async function ProductDetailPage({ params }: Props) {
     <div className="max-w-xl mx-auto p-4 space-y-4">
       {/* Image */}
       {imageUrl && (
-        <img
-          src={imageUrl}
-          alt={`${product.brand} ${product.model}`}
-          className="w-full h-64 object-contain rounded-xl bg-gray-100"
-        />
-      )}
+  <div className="relative">
+    <BackButton />
+    <img
+      src={imageUrl}
+      alt={`${product.brand} ${product.model}`}
+      className="w-full h-64 object-contain rounded-xl bg-gray-100"
+    />
+  </div>
+)}
 
       {/* Title */}
       <h1 className="text-xl font-semibold">

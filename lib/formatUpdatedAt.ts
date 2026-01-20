@@ -5,7 +5,7 @@ export function formatUpdatedAt(dateString: string) {
     const diffMs = now.getTime() - updated.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
   
-    if (diffHours < 1) {
+    if (diffHours < 24) {
       return '🟢 Yangilandi bugun';
     }
   
