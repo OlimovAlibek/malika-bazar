@@ -35,7 +35,7 @@ export default function ProductActions({
         <a
           href={`tel:${phone}`}
           onClick={() => track('call')}
-          className="flex-1 text-center bg-black text-white py-3 rounded-xl"
+          className="flex-1 text-center bg-black dark:bg-slate-700 text-white dark:text-slate-100 py-3 rounded-xl hover:bg-gray-800 dark:hover:bg-slate-600 transition"
         >
           📞 Call
         </a>
@@ -47,7 +47,7 @@ export default function ProductActions({
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => track('telegram')}
-          className="flex-1 text-center border py-3 rounded-xl"
+          className="flex-1 text-center border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition"
         >
           💬 Telegram
         </a>

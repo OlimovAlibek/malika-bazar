@@ -50,7 +50,7 @@ export default function TelegramLoginClient() {
       <button
         onClick={handleLogin}
         disabled={loading}
-        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
+        className="w-full bg-blue-500 dark:bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-600 dark:hover:bg-blue-700 transition"
       >
         Login with Telegram
       </button>
@@ -60,7 +60,7 @@ export default function TelegramLoginClient() {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="block text-center text-blue-600 underline"
+          className="block text-center text-blue-600 dark:text-blue-400 underline"
         >
           Open Telegram to confirm login
         </a>

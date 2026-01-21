@@ -27,16 +27,16 @@ export default async function HomePage() {
   .limit(10);
 
   if (error) {
-    return <div className="p-4">Xatolik yuz berdi</div>;
+    return <div className="p-4 text-slate-900 dark:text-slate-100">Xatolik yuz berdi</div>;
   }
 
   return (
     <main className="min-h-screen pb-8">
       {/* Product Top Nav */}
-      <div className="sticky top-0 z-20 bg-white border-b">
+      <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Logo / Name */}
-          <div className="font-bold text-base text-slate-900 whitespace-nowrap">
+          <div className="font-bold text-base text-slate-900 dark:text-slate-100 whitespace-nowrap">
             Malika
           </div>
 
@@ -46,7 +46,7 @@ export default async function HomePage() {
               type="text"
               name="query"
               placeholder="Telefon qidirish…"
-              className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </form>
         </div>
@@ -58,7 +58,7 @@ export default async function HomePage() {
           <a
             key={brand}
             href={`/brands/${brand.toLowerCase()}`}
-            className="shrink-0 px-4 py-2 rounded-full border text-sm font-medium text-gray-700 hover:bg-gray-100"
+            className="shrink-0 px-4 py-2 rounded-full border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700"
           >
             {brand}
           </a>
@@ -68,10 +68,10 @@ export default async function HomePage() {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 pt-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-gray-500">
+          <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">
             Eng arzon narxlar
           </h2>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+          <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
             {products?.length || 0} ta
           </span>
         </div>

@@ -4,10 +4,10 @@ export default function HomeLoading() {
   return (
     <main className="min-h-screen pb-8">
       {/* Top nav placeholder */}
-      <div className="sticky top-0 z-20 bg-white border-b">
+      <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="w-20 h-6 bg-gray-200 rounded animate-pulse" />
-          <div className="flex-1 h-9 bg-gray-200 rounded-xl animate-pulse" />
+          <div className="w-20 h-6 bg-gray-200 dark:bg-slate-700 rounded animate-pulse" />
+          <div className="flex-1 h-9 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
         </div>
       </div>
 

@@ -4,14 +4,14 @@ export default function PhonesLoading() {
   return (
     <main className="min-h-screen pb-8">
       {/* Search + filters placeholder */}
-      <div className="sticky top-0 bg-white border-b">
+      <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
-          <div className="h-9 bg-gray-200 rounded-xl animate-pulse" />
+          <div className="h-9 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
           <div className="flex gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-8 w-20 bg-gray-200 rounded-xl animate-pulse"
+                className="h-8 w-20 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse"
               />
             ))}
           </div>

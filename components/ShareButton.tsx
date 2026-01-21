@@ -20,9 +20,9 @@ export default function ShareButton({ title, price }: Props) {
   return (
     <button
       onClick={share}
-      className="w-full border py-3 rounded-xl text-center font-medium"
+      className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 py-3 rounded-xl text-center font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition"
     >
-      📤 Telegram’da ulashish
+      📤 Telegram&apos;da ulashish
     </button>
   );
 }

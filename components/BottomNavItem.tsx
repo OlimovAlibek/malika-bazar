@@ -23,8 +23,8 @@ export default function BottomNavItem({ href, label, icon }: Props) {
         href={href}
         className={`flex flex-col items-center justify-center py-2 text-xs ${
           isActive
-            ? 'text-emerald-600 font-semibold'
-            : 'text-gray-400'
+            ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+            : 'text-gray-400 dark:text-gray-500'
         }`}
       >
         <span className="text-lg">{icon}</span>

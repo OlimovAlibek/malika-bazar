@@ -26,16 +26,16 @@ export default function LoginPage() {
 
   return (
     <main className="p-4 space-y-3">
-      <h1 className="text-lg font-bold">Admin Login</h1>
+      <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">Admin Login</h1>
 
       <input
-        className="border p-2 w-full"
+        className="border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-2 w-full rounded"
         placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
       />
 
       <input
-        className="border p-2 w-full"
+        className="border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 p-2 w-full rounded"
         type="password"
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
@@ -43,7 +43,7 @@ export default function LoginPage() {
 
       <button
         onClick={login}
-        className="bg-black text-white p-2 w-full"
+        className="bg-black dark:bg-slate-700 text-white dark:text-slate-100 p-2 w-full rounded hover:bg-gray-800 dark:hover:bg-slate-600 transition"
       >
         Login
       </button>

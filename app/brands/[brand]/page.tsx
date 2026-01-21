@@ -97,12 +97,12 @@ const { data: products } = await publicSupabase
     
 
       {/* H1 */}
-      <h1 className="text-xl font-bold">
+      <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
         {brandDisplay} telefon narxlari Malika bozori
       </h1>
 
       {/* AI-friendly intro */}
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-gray-600 dark:text-gray-400">
         Malika bozorida {brandDisplay} telefonlarining narxlari model,
         xotira va do‘konga qarab farq qiladi. Quyida Malika bozorida
         sotilayotgan {brandDisplay} smartfonlarining eng so‘nggi narxlari
@@ -124,7 +124,7 @@ const { data: products } = await publicSupabase
               <PhoneCard
                 key={product.id}
                 id={product.id}
-                slug={product.slug}
+                slug={product.slug || product.id}
                 brand={product.brand}
                 model={product.model}
                 storage_gb={product.storage_gb}
@@ -139,34 +139,34 @@ const { data: products } = await publicSupabase
           })}
         </ul>
       ) : (
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           Hozircha mahsulotlar mavjud emas.
         </p>
       )}
 
       {/* FAQ — AI GOLD */}
-      <section className="pt-6 border-t space-y-3">
-        <h2 className="font-semibold">
+      <section className="pt-6 border-t border-gray-200 dark:border-slate-700 space-y-3">
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100">
           Ko‘p so‘raladigan savollar
         </h2>
 
-        <p className="text-sm">
+        <p className="text-sm text-slate-900 dark:text-slate-100">
           <strong>
             Malika bozorida {brandDisplay} telefonlari arzonmi?
           </strong>
           <br />
-          Odatda Malika bozorida {brandDisplay} telefonlari rasmiy
+          <span className="text-gray-600 dark:text-gray-400">Odatda Malika bozorida {brandDisplay} telefonlari rasmiy
           do‘konlarga nisbatan arzonroq bo‘ladi, chunki do‘konlar
-          narxlarni mustaqil belgilaydi.
+          narxlarni mustaqil belgilaydi.</span>
         </p>
 
-        <p className="text-sm">
+        <p className="text-sm text-slate-900 dark:text-slate-100">
           <strong>
             {brandDisplay} telefon narxlari tez-tez o‘zgaradimi?
           </strong>
           <br />
-          Ha, valyuta kursi va yetkazib berish sharoitlariga qarab
-          narxlar tez-tez yangilanadi.
+          <span className="text-gray-600 dark:text-gray-400">Ha, valyuta kursi va yetkazib berish sharoitlariga qarab
+          narxlar tez-tez yangilanadi.</span>
         </p>
       </section>
     </main>

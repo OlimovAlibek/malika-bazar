@@ -1,6 +1,7 @@
 export const revalidate = 3600;
 
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { publicSupabase } from '@/lib/supabase/public';
 import { formatUpdatedAt } from '@/lib/formatUpdatedAt';
 import ProductActions from '@/components/ProductActions';
@@ -106,7 +107,7 @@ export default async function ProductDetailPage({ params }: Props) {
     .single();
 
   if (error || !product) {
-    return <div className="p-4">Mahsulot topilmadi</div>;
+    return <div className="p-4 text-slate-900 dark:text-slate-100">Mahsulot topilmadi</div>;
   }
 
   const shop = Array.isArray(product.shop) ? product.shop[0] : product.shop;
@@ -143,21 +144,23 @@ export default async function ProductDetailPage({ params }: Props) {
       
       {/* Image */}
       {imageUrl && (
-  <div className="relative">
+  <div className="relative w-full h-64 rounded-xl bg-gray-100 dark:bg-slate-800">
     <BackButton />
-    <img
+    <Image
       src={imageUrl}
       alt={`${product.brand} ${product.model}`}
-      className="w-full h-64 object-contain rounded-xl bg-gray-100"
+      fill
+      sizes="(max-width: 768px) 100vw, 600px"
+      className="object-contain rounded-xl"
     />
   </div>
 )}
 
       {/* Title */}
-      <h1 className="text-xl font-semibold">
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
         <a
           href={`/brands/${product.brand.toLowerCase()}`}
-          className="text-emerald-600 hover:underline"
+          className="text-emerald-600 dark:text-emerald-400 hover:underline"
         >
           {product.brand}
         </a>{' '}
@@ -165,19 +168,19 @@ export default async function ProductDetailPage({ params }: Props) {
       </h1>
 
       {/* Price */}
-      <div className="text-3xl font-bold">
+      <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
         {product.price_uzs.toLocaleString()} so‘m
       </div>
 
       {/* Updated */}
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-gray-500 dark:text-gray-400">
         {formatUpdatedAt(product.updated_at)}
       </div>
 
       {/* Shop info */}
-      <div className="border rounded-xl p-3 space-y-1">
-        <div className="font-medium">{shop.name}</div>
-        <div className="text-sm text-gray-600">
+      <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-3 space-y-1 bg-white dark:bg-slate-800">
+        <div className="font-medium text-slate-900 dark:text-slate-100">{shop.name}</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
           Shop {shop.shop_number}
         </div>
       </div>

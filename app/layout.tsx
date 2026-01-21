@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import ThemeProvider from '@/components/ThemeProvider';
+import DarkModeToggle from '@/components/DarkModeToggle';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +15,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uz">
-      <body>{children}</body>
+      
+      <body className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors">
+      <ThemeProvider>
+        <DarkModeToggle />
+        {children}
+        </ThemeProvider>
+        </body>
+      
     </html>
   );
 }
