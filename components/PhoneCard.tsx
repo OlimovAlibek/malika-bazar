@@ -12,6 +12,7 @@ type PhoneCardProps = {
   shopNumber: string;
   imageUrl?: string;
   updated_at?: string;
+  variant?: 'grid' | 'list';
 };
 
 
@@ -26,33 +27,42 @@ export function PhoneCard({
   shopNumber,
   imageUrl,
   updated_at,
+  variant = 'grid',
 }: PhoneCardProps) {
   return (
     <li className="list-none">
       <Link
         href={`/phones/${id}`}
-        className="block bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all cursor-pointer no-underline"
+        className="block bg-white border border-gray-200 rounded-2xl p-3 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all cursor-pointer no-underline"
         prefetch={true}
       >
         {/* IMAGE */}
         {imageUrl && (
-          <div className="relative w-full h-52 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden mb-4 border border-gray-100 pointer-events-none">
+          <div
+          className={`relative w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden border border-gray-100 mb-2
+            ${variant === 'grid' ? 'aspect-square' : 'h-48'}
+          `}
+        >
             <Image
               src={imageUrl}
               alt={`${brand} ${model}`}
               fill
               sizes="(max-width: 768px) 100vw, 400px"
-              className="object-contain p-3 pointer-events-none"
+              className="object-contain p-2 pointer-events-none"
             />
           </div>
         )}
 
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex-1">
-            <div className="font-semibold text-base text-slate-900 mb-0.5">
+          <div
+            className={`font-semibold text-slate-900 leading-tight
+              ${variant === 'grid' ? 'text-sm' : 'text-base'}
+            `}
+          >
               {brand} {model}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className={`text-gray-500 ${variant === 'grid' ? 'text-xs' : 'text-sm'}`}>
               {storage_gb}GB
             </div>
           </div>
@@ -60,31 +70,35 @@ export function PhoneCard({
         </div>
 
 
-        <div className="flex items-baseline gap-2 mb-3">
-          <div className="text-3xl font-bold text-slate-900">
+        <div className="flex items-baseline gap-1 mb-2">
+        <div
+          className={`font-bold text-slate-900
+            ${variant === 'grid' ? 'text-lg' : 'text-2xl'}
+          `}
+        >
             {price_uzs.toLocaleString()}
           </div>
-          <div className="text-lg font-medium text-gray-500">
+          <div className="text-sm font-medium text-gray-500">
             so&apos;m
           </div>
         </div>
 
         {updated_at && (
-          <div className="text-xs text-gray-500 mb-3">
+          <div className="text-xs text-gray-500 mb-2">
             {formatUpdatedAt(updated_at)}
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1">
+            {/* <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
               Do&apos;kon
-            </span>
-            <span className="text-sm font-semibold text-slate-700">
+            </span> */}
+            <span className="text-xs font-semibold text-slate-700">
               {shopName}
             </span>
           </div>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-mono font-semibold">
+          <span className="inline-flex items-center px-1 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-mono font-semibold">
             #{shopNumber}
           </span>
         </div>

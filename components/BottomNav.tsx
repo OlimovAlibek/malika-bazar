@@ -1,41 +1,21 @@
-'use client';
+// components/BottomNav.tsx (SERVER COMPONENT)
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
+import BottomNavItem from './BottomNavItem';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-
-const navItems = [
-  { href: '/', label: 'Bosh sahifa', icon: '🏠' },
-  { href: '/phones', label: 'Telefonlar', icon: '📱' },
-//   { href: '/login', label: 'Admin', icon: '👤' },
-];
-
-export default function BottomNav() {
-  const pathname = usePathname();
+export default async function BottomNav() {
+  const user = await getCurrentUser();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white">
-      <ul className="grid grid-cols-2 max-w-xl mx-auto">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== '/' && pathname.startsWith(item.href));
+      <ul className="grid grid-cols-3 max-w-xl mx-auto">
+        <BottomNavItem href="/" label="Bosh sahifa" icon="🏠" />
+        <BottomNavItem href="/phones" label="Telefonlar" icon="📱" />
 
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex flex-col items-center justify-center py-2 text-xs ${
-                  isActive
-                    ? 'text-emerald-600 font-semibold'
-                    : 'text-gray-400'
-                }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
+        {user ? (
+          <BottomNavItem href="/profile" label="Profil" icon="👤" />
+        ) : (
+          <BottomNavItem href="/tg" label="Kirish" icon="🔐" />
+        )}
       </ul>
     </nav>
   );

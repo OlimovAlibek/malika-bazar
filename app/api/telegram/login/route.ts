@@ -1,0 +1,38 @@
+import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+import { createClient } from '@/lib/supabase/server';
+
+export async function POST() {
+  const supabase = await createClient();
+
+  await supabase
+  .from('telegram_login_tokens')
+  .delete()
+  .lt('expires_at', new Date().toISOString());
+
+  // 1️⃣ Generate random token
+  const token = crypto.randomBytes(24).toString('hex');
+
+  // 2️⃣ Expiration (5 minutes)
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+  // 3️⃣ Save token
+  const { error } = await supabase
+    .from('telegram_login_tokens')
+    .insert({
+      token,
+      expires_at: expiresAt,
+    });
+
+  if (error) {
+    return NextResponse.json(
+      { error: 'Failed to create token' },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    token,
+    telegram_url: `https://t.me/malikabazar_bot?start=login_${token}`,
+  });
+}

@@ -33,7 +33,7 @@ export default async function PhonesPage({ searchParams }: Props) {
         shop_number
       ),
       product_images (
-  image_url
+      image_url
 )
     `)
     .eq('is_active', true);
@@ -166,6 +166,7 @@ export default async function PhonesPage({ searchParams }: Props) {
                 shopName={shop.name}
                 shopNumber={shop.shop_number}
                 imageUrl={imageUrl}
+                variant="list"
               />
             );
           })}

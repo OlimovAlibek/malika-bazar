@@ -62,15 +62,11 @@ export default async function HomePage() {
           </span>
         </div>
 
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-2 gap-3">
           {products?.map((product) => {
-            const shop = Array.isArray(product.shop)
-              ? product.shop[0]
-              : product.shop;
-
+            const shop = Array.isArray(product.shop) ? product.shop[0] : product.shop;
             const imageUrl =
-              Array.isArray(product.product_images) &&
-              product.product_images[0]
+              Array.isArray(product.product_images) && product.product_images[0]
                 ? product.product_images[0].image_url
                 : undefined;
 
@@ -86,6 +82,7 @@ export default async function HomePage() {
                 shopName={shop.name}
                 shopNumber={shop.shop_number}
                 imageUrl={imageUrl}
+                variant="grid"
               />
             );
           })}
@@ -94,3 +91,4 @@ export default async function HomePage() {
     </main>
   );
 }
+

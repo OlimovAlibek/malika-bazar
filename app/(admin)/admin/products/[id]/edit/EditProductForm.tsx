@@ -73,11 +73,11 @@ export default function EditProductForm({ product, shops }: Props) {
       {currentImage && (
         <div className="relative w-full h-40 rounded bg-gray-100 overflow-hidden">
           <Image
-            src={currentImage}
+          src={currentImage}
             alt="Product preview"
             fill
             className="object-contain"
-          />
+        />
         </div>
       )}
 
