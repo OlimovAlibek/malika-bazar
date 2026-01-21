@@ -16,21 +16,28 @@ type Props = {
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const brandName =
-    params.brand.charAt(0).toUpperCase() + params.brand.slice(1);
+    const brandSlug = params.brand.trim();
+const brandDisplay =
+  brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1);
+
+const { data: products } = await publicSupabase
+  .from('products')
+  .select('id')
+  .ilike('brand', brandSlug)   // ✅ FIX
+  .eq('is_active', true);
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
   const canonicalUrl = `${siteUrl}/brands/${params.brand}`;
 
   return {
-    title: `${brandName} telefon narxlari Malika bozori (2026)`,
-    description: `Malika bozorida ${brandName} telefonlarining eng so‘nggi narxlari. Modellar, xotira va real bozor narxlari bilan tanishing.`,
+    title: `${brandDisplay} telefon narxlari Malika bozori (2026)`,
+    description: `Malika bozorida ${brandDisplay} telefonlarining eng so‘nggi narxlari. Modellar, xotira va real bozor narxlari bilan tanishing.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${brandName} telefon narxlari Malika bozori`,
-      description: `Malika bozorida ${brandName} telefonlarining real va yangilanib turuvchi narxlari.`,
+      title: `${brandDisplay} telefon narxlari Malika bozori`,
+      description: `Malika bozorida ${brandDisplay} telefonlarining real va yangilanib turuvchi narxlari.`,
       url: canonicalUrl,
     },
   };
@@ -41,37 +48,39 @@ export async function generateMetadata(
 ========================= */
 export default async function BrandPage({ params }: Props) {
   
-const brandName = params.brand.toUpperCase().trim();
+    const brandSlug = params.brand.trim();
+    const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/brands/${brandSlug}`;
+    
+const brandDisplay =
+  brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1);
 
-    const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/brands/${brandName.toLowerCase()}`;
-
-  const { data: products } = await publicSupabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      brand,
-      model,
-      storage_gb,
-      price_uzs,
-      updated_at,
-      shop:shops!inner (
-        name,
-        shop_number
-      ),
-      product_images (
-        image_url
-      )
-    `)
-    .eq('brand', brandName)
-    .eq('is_active', true)
-    .order('price_uzs', { ascending: true });
+const { data: products } = await publicSupabase
+  .from('products')
+  .select(`
+    id,
+    slug,
+    brand,
+    model,
+    storage_gb,
+    price_uzs,
+    updated_at,
+    shop:shops!inner (
+      name,
+      shop_number
+    ),
+    product_images (
+      image_url
+    )
+  `)
+  .ilike('brand', brandSlug)   // ✅ FIX
+  .eq('is_active', true)
+  .order('price_uzs', { ascending: true });
 
     const brandJsonLd = {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        name: `${brandName} telefon narxlari`,
-        description: `Malika bozoridagi ${brandName} telefonlarining eng so‘nggi narxlari.`,
+        name: `${brandDisplay} telefon narxlari`,
+        description: `Malika bozoridagi ${brandDisplay} telefonlarining eng so‘nggi narxlari.`,
         url: `${canonicalUrl}`,
       };
 
@@ -89,14 +98,14 @@ const brandName = params.brand.toUpperCase().trim();
 
       {/* H1 */}
       <h1 className="text-xl font-bold">
-        {brandName} telefon narxlari Malika bozori
+        {brandDisplay} telefon narxlari Malika bozori
       </h1>
 
       {/* AI-friendly intro */}
       <p className="text-sm text-gray-600">
-        Malika bozorida {brandName} telefonlarining narxlari model,
+        Malika bozorida {brandDisplay} telefonlarining narxlari model,
         xotira va do‘konga qarab farq qiladi. Quyida Malika bozorida
-        sotilayotgan {brandName} smartfonlarining eng so‘nggi narxlari
+        sotilayotgan {brandDisplay} smartfonlarining eng so‘nggi narxlari
         keltirilgan.
       </p>
 
@@ -143,17 +152,17 @@ const brandName = params.brand.toUpperCase().trim();
 
         <p className="text-sm">
           <strong>
-            Malika bozorida {brandName} telefonlari arzonmi?
+            Malika bozorida {brandDisplay} telefonlari arzonmi?
           </strong>
           <br />
-          Odatda Malika bozorida {brandName} telefonlari rasmiy
+          Odatda Malika bozorida {brandDisplay} telefonlari rasmiy
           do‘konlarga nisbatan arzonroq bo‘ladi, chunki do‘konlar
           narxlarni mustaqil belgilaydi.
         </p>
 
         <p className="text-sm">
           <strong>
-            {brandName} telefon narxlari tez-tez o‘zgaradimi?
+            {brandDisplay} telefon narxlari tez-tez o‘zgaradimi?
           </strong>
           <br />
           Ha, valyuta kursi va yetkazib berish sharoitlariga qarab
