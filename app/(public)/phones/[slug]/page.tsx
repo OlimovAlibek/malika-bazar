@@ -1,4 +1,4 @@
-export const revalidate = 0;
+export const revalidate = 3600;
 
 import type { Metadata } from 'next';
 import { publicSupabase } from '@/lib/supabase/public';
@@ -8,7 +8,9 @@ import ShareButton from '@/components/ShareButton';
 import BackButton from '@/components/BackButton';
 
 type Props = {
-  params: { id: string };
+  params: {
+    slug: string;
+  };
 };
 
 /* =========================
@@ -20,6 +22,7 @@ export async function generateMetadata(
   const { data: product } = await publicSupabase
     .from('products')
     .select(`
+      slug,
       brand,
       model,
       storage_gb,
@@ -31,7 +34,7 @@ export async function generateMetadata(
         image_url
       )
     `)
-    .eq('id', params.id)
+    .eq('slug', params.slug)
     .single();
 
   if (!product) {
@@ -43,18 +46,27 @@ export async function generateMetadata(
   const shop = Array.isArray(product.shops) ? product.shops[0] : product.shops;
   const title = `${product.brand} ${product.model} ${product.storage_gb}GB — ${product.price_uzs.toLocaleString()} so‘m`;
   const description = `Malika bozorida ${product.brand} ${product.model} ${product.storage_gb}GB narxi. Do‘kon: ${shop?.name || ''}. Eng so‘nggi narxlar.`;
-
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
   const image = product.product_images?.[0]?.image_url;
+  const canonicalUrl = `${siteUrl}/phones/${params.slug}`;
+
 
   return {
     title,
     description,
+  
+    alternates: {
+      canonical: canonicalUrl,
+    },
+  
     openGraph: {
       title,
       description,
+      url: canonicalUrl,
       images: image ? [image] : [],
       type: 'article',
     },
+  
     twitter: {
       card: 'summary_large_image',
       title,
@@ -72,6 +84,7 @@ export default async function ProductDetailPage({ params }: Props) {
     .from('products')
     .select(`
       id,
+      slug,
       brand,
       model,
       storage_gb,
@@ -88,7 +101,7 @@ export default async function ProductDetailPage({ params }: Props) {
         image_url
       )
     `)
-    .eq('id', params.id)
+    .eq('slug', params.slug)
     .eq('is_active', true)
     .single();
 
@@ -98,9 +111,36 @@ export default async function ProductDetailPage({ params }: Props) {
 
   const shop = Array.isArray(product.shop) ? product.shop[0] : product.shop;
   const imageUrl = product.product_images?.[0]?.image_url;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${product.brand} ${product.model} ${product.storage_gb}GB`,
+    image: imageUrl ? [imageUrl] : [],
+    description: `Malika bozorida ${product.brand} ${product.model} ${product.storage_gb}GB telefon narxi.`,
+    brand: {
+      "@type": "Brand",
+      name: product.brand,
+    },
+    offers: {
+      "@type": "Offer", 
+      priceCurrency: "UZS",
+      price: product.price_uzs,
+      availability: "https://schema.org/InStock",
+      url: `${siteUrl}/phones/${product.slug}`,
+    },
+  };
 
   return (
+<> 
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+/>
+    
     <div className="max-w-xl mx-auto p-4 space-y-4">
+      
       {/* Image */}
       {imageUrl && (
   <div className="relative">
@@ -115,7 +155,13 @@ export default async function ProductDetailPage({ params }: Props) {
 
       {/* Title */}
       <h1 className="text-xl font-semibold">
-        {product.brand} {product.model} {product.storage_gb}GB
+        <a
+          href={`/brands/${product.brand.toLowerCase()}`}
+          className="text-emerald-600 hover:underline"
+        >
+          {product.brand}
+        </a>{' '}
+        {product.model} {product.storage_gb}GB
       </h1>
 
       {/* Price */}
@@ -150,5 +196,6 @@ export default async function ProductDetailPage({ params }: Props) {
         price={product.price_uzs}
       />
     </div>
+    </>
   );
 }

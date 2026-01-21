@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 type PhoneCardProps = {
   id: string;
+  slug: string;
   brand: string;
   model: string;
   storage_gb: number;
@@ -19,6 +20,7 @@ type PhoneCardProps = {
 
 export function PhoneCard({
   id,
+  slug,
   brand,
   model,
   storage_gb,
@@ -32,7 +34,7 @@ export function PhoneCard({
   return (
     <li className="list-none">
       <Link
-        href={`/phones/${id}`}
+        href={`/phones/${slug}`}
         className="block bg-white border border-gray-200 rounded-2xl p-3 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all cursor-pointer no-underline"
         prefetch={true}
       >

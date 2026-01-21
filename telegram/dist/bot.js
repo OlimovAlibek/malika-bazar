@@ -1,17 +1,12 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const dotenv_1 = __importDefault(require("dotenv"));
-const result = dotenv_1.default.config({ path: '../.env.local' });
-const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
-const supabase_js_1 = require("./supabase.js");
+import dotenv from 'dotenv';
+const result = dotenv.config({ path: '../.env.local' });
+import TelegramBot from 'node-telegram-bot-api';
+import { supabase } from './supabase.js';
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
     throw new Error('TELEGRAM_BOT_TOKEN is missing');
 }
-const bot = new node_telegram_bot_api_1.default(token, { polling: true });
+const bot = new TelegramBot(token, { polling: true });
 console.log('🤖 Telegram bot started (polling mode)');
 bot.on('message', async (msg) => {
     const chatId = msg.chat.id;
@@ -22,7 +17,7 @@ bot.on('message', async (msg) => {
     console.log('👤 Telegram user:', user.id);
     console.log('📩 Message:', text);
     // Always upsert user
-    await supabase_js_1.supabase.from('telegram_users').upsert({
+    await supabase.from('telegram_users').upsert({
         telegram_id: user.id,
         username: user.username,
         first_name: user.first_name,
@@ -47,7 +42,7 @@ bot.on('message', async (msg) => {
             return;
         }
         console.log('[bot] Processing login token:', token.substring(0, 8) + '...');
-        const { data: loginToken, error: findError } = await supabase_js_1.supabase
+        const { data: loginToken, error: findError } = await supabase
             .from('telegram_login_tokens')
             .select('*')
             .eq('token', token)
@@ -59,7 +54,7 @@ bot.on('message', async (msg) => {
             await bot.sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
             return;
         }
-        const { error: updateError } = await supabase_js_1.supabase
+        const { error: updateError } = await supabase
             .from('telegram_login_tokens')
             .update({
             used: true,

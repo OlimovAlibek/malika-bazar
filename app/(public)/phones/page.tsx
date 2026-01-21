@@ -23,6 +23,7 @@ export default async function PhonesPage({ searchParams }: Props) {
     .from('products')
     .select(`
       id,
+      slug,
       brand,
       model,
       storage_gb,
@@ -158,6 +159,7 @@ export default async function PhonesPage({ searchParams }: Props) {
               <PhoneCard
                 key={product.id}
                 id={product.id}
+                slug={product.slug || product.id}
                 brand={product.brand}
                 model={product.model}
                 storage_gb={product.storage_gb}
