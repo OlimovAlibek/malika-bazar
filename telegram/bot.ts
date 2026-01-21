@@ -17,7 +17,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 console.log('🤖 Telegram bot started (polling mode)');
 
-bot.on('message', async (msg) => {
+bot.on('message', async (msg:any) => {
   const chatId = msg.chat.id;
   const user = msg.from;
   const text = msg.text;
