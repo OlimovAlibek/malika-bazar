@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export const revalidate = 0;
 
 import { publicSupabase } from '@/lib/supabase/public';
@@ -36,9 +38,19 @@ export default async function HomePage() {
       <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Logo / Name */}
-          <div className="font-bold text-base text-slate-900 dark:text-slate-100 whitespace-nowrap">
-            Malika
-          </div>
+          <a href="/" className="flex items-center gap-2 shrink-0">
+  <Image
+    src="/logo.jpeg"
+    alt="Tezku — telefon narxlari"
+    width={36}
+    height={36}
+    className="rounded-full"
+    priority
+  />
+  <span className="font-bold text-base text-slate-900 dark:text-slate-100">
+    Tezku
+  </span>
+</a>
 
           {/* Search */}
           <form action="/phones" method="get" className="flex-1">

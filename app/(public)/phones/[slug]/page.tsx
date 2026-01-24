@@ -40,13 +40,13 @@ export async function generateMetadata(
 
   if (!product) {
     return {
-      title: 'Mahsulot topilmadi | Malika Bazar',
+      title: 'Mahsulot topilmadi | Tezku',
     };
   }
 
   const shop = Array.isArray(product.shops) ? product.shops[0] : product.shops;
-  const title = `${product.brand} ${product.model} ${product.storage_gb}GB — ${product.price_uzs.toLocaleString()} so‘m`;
-  const description = `Malika bozorida ${product.brand} ${product.model} ${product.storage_gb}GB narxi. Do‘kon: ${shop?.name || ''}. Eng so‘nggi narxlar.`;
+  const title = `${product.brand} ${product.model} ${product.storage_gb}GB — ${product.price_uzs.toLocaleString()} so‘m | Tezku`;
+  const description = `Tezku — Malika bozorida ${product.brand} ${product.model} ${product.storage_gb}GB narxi. Do‘kon: ${shop?.name || ''}. Eng so‘nggi narxlar.`;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
   const image = product.product_images?.[0]?.image_url;
   const canonicalUrl = `${siteUrl}/phones/${params.slug}`;
@@ -119,7 +119,7 @@ export default async function ProductDetailPage({ params }: Props) {
     "@type": "Product",
     name: `${product.brand} ${product.model} ${product.storage_gb}GB`,
     image: imageUrl ? [imageUrl] : [],
-    description: `Malika bozorida ${product.brand} ${product.model} ${product.storage_gb}GB telefon narxi.`,
+    description: `Tezku — Malika bozorida ${product.brand} ${product.model} ${product.storage_gb}GB telefon narxi.`,
     brand: {
       "@type": "Brand",
       name: product.brand,

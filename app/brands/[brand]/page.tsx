@@ -30,14 +30,14 @@ const { data: products } = await publicSupabase
   const canonicalUrl = `${siteUrl}/brands/${params.brand}`;
 
   return {
-    title: `${brandDisplay} telefon narxlari Malika bozori (2026)`,
-    description: `Malika bozorida ${brandDisplay} telefonlarining eng so‘nggi narxlari. Modellar, xotira va real bozor narxlari bilan tanishing.`,
+    title: `${brandDisplay} telefon narxlari | Tezku — Malika bozori`,
+    description: `Tezku — Malika bozorida ${brandDisplay} telefonlarining eng so'nggi narxlari. Modellar, xotira va real bozor narxlari bilan tanishing.`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${brandDisplay} telefon narxlari Malika bozori`,
-      description: `Malika bozorida ${brandDisplay} telefonlarining real va yangilanib turuvchi narxlari.`,
+      title: `${brandDisplay} telefon narxlari | Tezku — Malika bozori`,
+      description: `Tezku — Malika bozorida ${brandDisplay} telefonlarining real va yangilanib turuvchi narxlari.`,
       url: canonicalUrl,
     },
   };
@@ -80,7 +80,7 @@ const { data: products } = await publicSupabase
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         name: `${brandDisplay} telefon narxlari`,
-        description: `Malika bozoridagi ${brandDisplay} telefonlarining eng so‘nggi narxlari.`,
+        description: `Tezku — Malika bozoridagi ${brandDisplay} telefonlarining eng so'nggi narxlari.`,
         url: `${canonicalUrl}`,
       };
 
@@ -98,14 +98,14 @@ const { data: products } = await publicSupabase
 
       {/* H1 */}
       <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-        {brandDisplay} telefon narxlari Malika bozori
+        {brandDisplay} telefon narxlari | Tezku
       </h1>
 
       {/* AI-friendly intro */}
       <p className="text-sm text-gray-600 dark:text-gray-400">
-        Malika bozorida {brandDisplay} telefonlarining narxlari model,
-        xotira va do‘konga qarab farq qiladi. Quyida Malika bozorida
-        sotilayotgan {brandDisplay} smartfonlarining eng so‘nggi narxlari
+        Tezku orqali Malika bozorida {brandDisplay} telefonlarining narxlari model,
+        xotira va do&apos;konga qarab farq qiladi. Quyida Malika bozorida
+        sotilayotgan {brandDisplay} smartfonlarining eng so&apos;nggi narxlari
         keltirilgan.
       </p>
 
@@ -155,8 +155,8 @@ const { data: products } = await publicSupabase
             Malika bozorida {brandDisplay} telefonlari arzonmi?
           </strong>
           <br />
-          <span className="text-gray-600 dark:text-gray-400">Odatda Malika bozorida {brandDisplay} telefonlari rasmiy
-          do‘konlarga nisbatan arzonroq bo‘ladi, chunki do‘konlar
+          <span className="text-gray-600 dark:text-gray-400">Tezku orqali ko&apos;rib chiqish mumkinki, odatda Malika bozorida {brandDisplay} telefonlari rasmiy
+          do&apos;konlarga nisbatan arzonroq bo&apos;ladi, chunki do&apos;konlar
           narxlarni mustaqil belgilaydi.</span>
         </p>
 

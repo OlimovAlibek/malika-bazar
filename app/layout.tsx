@@ -4,8 +4,8 @@ import DarkModeToggle from '@/components/DarkModeToggle';
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Malika Bazar",
-  description: "Phone price comparison from Malika market",
+  title: "Tezku — Malika bozori telefon narxlari",
+  description: "Tezku — Malika bozoridagi telefon narxlari. Eng so'nggi narxlar, solishtirish va qidiruv.",
 };
 
 export default function RootLayout({
