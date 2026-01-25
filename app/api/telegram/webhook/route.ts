@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabase/service';
 
+// Prevent any redirects - explicitly set runtime
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const update = await req.json();
