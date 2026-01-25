@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseService } from '@/lib/supabase/service';
 
 export async function POST(req: Request) {
   const update = await req.json();
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const text = message.text;
   const user = message.from;
 
-  const supabase = await createClient();
+  const supabase = supabaseService;
 
   // Save telegram user
   await supabase.from('telegram_users').upsert({
@@ -22,12 +22,12 @@ export async function POST(req: Request) {
     username: user.username,
     first_name: user.first_name,
     language_code: user.language_code,
-    source: text.startsWith('login_') ? 'magic_login' : 'direct',
+    source: text.includes('login_') ? 'magic_login' : 'direct',
   });
 
   // MAGIC LOGIN
-  if (text.startsWith('/start login_') || text.startsWith('login_')) {
-    const token = text.split('login_')[1]?.trim();
+  if (text.startsWith('/start login_') || text.includes('login_')) {
+    const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
 
     if (!token) {
       return NextResponse.json({ ok: true });
