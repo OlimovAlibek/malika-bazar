@@ -1,82 +1,82 @@
 import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabase/service';
 
-// Prevent any redirects - explicitly set runtime
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  try {
-    const update = await req.json();
+  const update = await req.json();
 
-    // Only handle messages
-    const message = update.message;
-    if (!message?.text || !message.from) {
-      return NextResponse.json({ ok: true }, { status: 200 });
-    }
+  // ✅ IMMEDIATE RESPONSE TO TELEGRAM
+  // Do NOT await anything critical before this
+  processUpdate(update).catch(err => {
+    console.error('[telegram webhook async error]', err);
+  });
 
-    const chatId = message.chat.id;
-    const text = message.text;
-    const user = message.from;
-
-    const supabase = supabaseService;
-
-    // Save telegram user
-    await supabase.from('telegram_users').upsert({
-      telegram_id: user.id,
-      username: user.username,
-      first_name: user.first_name,
-      language_code: user.language_code,
-      source: text.includes('login_') ? 'magic_login' : 'direct',
-    });
-
-    // MAGIC LOGIN
-    if (text.startsWith('/start login_') || text.includes('login_')) {
-      const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
-
-      if (!token) {
-        return NextResponse.json({ ok: true }, { status: 200 });
-      }
-
-      const { data: loginToken } = await supabase
-        .from('telegram_login_tokens')
-        .select('*')
-        .eq('token', token)
-        .eq('used', false)
-        .gt('expires_at', new Date().toISOString())
-        .single();
-
-      if (!loginToken) {
-        await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
-        return NextResponse.json({ ok: true }, { status: 200 });
-      }
-
-      await supabase
-        .from('telegram_login_tokens')
-        .update({
-          used: true,
-          telegram_id: user.id,
-        })
-        .eq('id', loginToken.id);
-
-      await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
-      return NextResponse.json({ ok: true }, { status: 200 });
-    }
-
-    await sendMessage(
-      chatId,
-      '👋 Salom! Login qilish uchun sayt orqali kirish tugmasidan foydalaning.'
-    );
-
-    return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (error) {
-    console.error('[webhook] Error:', error);
-    // Always return 200 to Telegram, even on error
-    return NextResponse.json({ ok: true }, { status: 200 });
-  }
+  return NextResponse.json({ ok: true }, { status: 200 });
 }
 
-// 🔹 Telegram API sender
+/* ===============================
+   ASYNC PROCESSING (SAFE)
+================================ */
+async function processUpdate(update: any) {
+  const message = update.message;
+  if (!message?.text || !message.from) return;
+
+  const chatId = message.chat.id;
+  const text = message.text;
+  const user = message.from;
+
+  const supabase = supabaseService;
+
+  // Save telegram user (non-blocking)
+  await supabase.from('telegram_users').upsert({
+    telegram_id: user.id,
+    username: user.username,
+    first_name: user.first_name,
+    language_code: user.language_code,
+    source: text.includes('login_') ? 'magic_login' : 'direct',
+  });
+
+  // MAGIC LOGIN
+  if (text.startsWith('/start login_') || text.includes('login_')) {
+    const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
+    if (!token) return;
+
+    const { data: loginToken } = await supabase
+      .from('telegram_login_tokens')
+      .select('*')
+      .eq('token', token)
+      .eq('used', false)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (!loginToken) {
+      await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
+      return;
+    }
+
+    await supabase
+      .from('telegram_login_tokens')
+      .update({
+        used: true,
+        telegram_id: user.id,
+      })
+      .eq('id', loginToken.id);
+
+    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
+    return;
+  }
+
+  await sendMessage(
+    chatId,
+    '👋 Salom! Login qilish uchun sayt orqali kirish tugmasidan foydalaning.'
+  );
+}
+
+/* ===============================
+   TELEGRAM SENDER
+================================ */
 async function sendMessage(chatId: number, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN!;
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
