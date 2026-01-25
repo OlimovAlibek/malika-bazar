@@ -33,6 +33,6 @@ export async function POST() {
 
   return NextResponse.json({
     token,
-    telegram_url: `https://t.me/malikabazar_bot?start=login_${token}`,
+    telegram_url: `https://t.me/tezkubot?start=login_${token}`,
   });
 }
