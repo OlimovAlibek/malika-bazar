@@ -21,7 +21,26 @@ export async function POST(req: Request) {
 ================================ */
 async function processUpdate(update: any) {
   const message = update.message;
-  if (!message?.text || !message.from) return;
+  if (!message || !message.from) return;
+
+  // 📞 PHONE SHARING HANDLER
+if (message.contact) {
+  const phone = message.contact.phone_number;
+  const telegramId = message.from.id;
+  const chatId = message.chat.id;
+
+  await supabaseService
+    .from('telegram_users')
+    .update({ phone })
+    .eq('telegram_id', telegramId);
+
+  await sendMessage(
+    chatId,
+    '✅ Rahmat! Telefon raqamingiz saqlandi.'
+  );
+
+  return;
+}
 
   const chatId = message.chat.id;
   const text = message.text;
@@ -57,15 +76,27 @@ async function processUpdate(update: any) {
     }
 
     await supabase
-      .from('telegram_login_tokens')
-      .update({
-        used: true,
-        telegram_id: user.id,
-      })
-      .eq('id', loginToken.id);
+  .from('telegram_login_tokens')
+  .update({
+    used: true,
+    telegram_id: user.id,
+  })
+  .eq('id', loginToken.id);
 
-    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
-    return;
+// 🔍 Check if phone exists
+const { data: tgUser } = await supabase
+  .from('telegram_users')
+  .select('phone')
+  .eq('telegram_id', user.id)
+  .single();
+
+if (!tgUser?.phone) {
+  await requestPhone(chatId);
+} else {
+  await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
+}
+
+return;
   }
 
   await sendMessage(
@@ -85,6 +116,25 @@ async function sendMessage(chatId: number, text: string) {
     body: JSON.stringify({
       chat_id: chatId,
       text,
+    }),
+  });
+}
+
+async function requestPhone(chatId: number) {
+  const token = process.env.TELEGRAM_BOT_TOKEN!;
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: '📞 Profilingizni to‘liq qilish uchun telefon raqamingizni ulashing',
+      reply_markup: {
+        keyboard: [
+          [{ text: '📞 Telefon raqamni ulashish', request_contact: true }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
     }),
   });
 }

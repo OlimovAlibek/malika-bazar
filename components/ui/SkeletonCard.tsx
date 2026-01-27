@@ -1,9 +1,16 @@
-import SkeletonImage from './ui/SkeletonImage';
-import SkeletonText from './ui/SkeletonText';
+import SkeletonImage from './SkeletonImage';
+import SkeletonText from './SkeletonText';
 
-export default function PhoneCardSkeleton() {
+interface SkeletonCardProps {
+  variant?: 'grid' | 'list';
+  className?: string;
+}
+
+export default function SkeletonCard({ variant = 'grid', className = '' }: SkeletonCardProps) {
   return (
-    <li className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+    <li
+      className={`bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-3 ${className}`}
+    >
       {/* Image */}
       <SkeletonImage aspectRatio="square" className="mb-2" />
 

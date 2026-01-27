@@ -1,4 +1,5 @@
 import PhoneCardSkeleton from '@/components/PhoneCardSkeleton';
+import SkeletonText from '@/components/ui/SkeletonText';
 
 export default function PhonesLoading() {
   return (
@@ -6,12 +7,14 @@ export default function PhonesLoading() {
       {/* Search + filters placeholder */}
       <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
-          <div className="h-9 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+          <SkeletonText width="w-full" height="h-9" className="rounded-xl" />
           <div className="flex gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div
+              <SkeletonText
                 key={i}
-                className="h-8 w-20 bg-gray-200 dark:bg-slate-700 rounded-xl animate-pulse"
+                width="w-20"
+                height="h-8"
+                className="rounded-xl"
               />
             ))}
           </div>

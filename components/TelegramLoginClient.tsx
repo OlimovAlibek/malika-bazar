@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ButtonLoader from './ui/ButtonLoader';
 
 export default function TelegramLoginClient() {
   const [token, setToken] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   async function handleLogin() {
     setToken(null);
-  setUrl(null);
+    setUrl(null);
     setLoading(true);
 
     const res = await fetch('/api/telegram/login', {
@@ -20,6 +22,8 @@ export default function TelegramLoginClient() {
     const data = await res.json();
     setToken(data.token);
     setUrl(data.telegram_url);
+    setLoading(false);
+    setChecking(true);
   }
 
   useEffect(() => {
@@ -49,10 +53,11 @@ export default function TelegramLoginClient() {
     <div className="space-y-3">
       <button
         onClick={handleLogin}
-        disabled={loading}
-        className="w-full bg-blue-500 dark:bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-600 dark:hover:bg-blue-700 transition"
+        disabled={loading || checking}
+        className="w-full bg-blue-500 dark:bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-600 dark:hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        Login with Telegram
+        {loading && <ButtonLoader size="sm" className="text-white" />}
+        {checking ? 'Tekshirilmoqda...' : 'Login with Telegram'}
       </button>
 
       {url && (

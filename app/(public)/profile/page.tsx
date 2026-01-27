@@ -28,6 +28,13 @@ export default async function ProfilePage() {
             {user.first_name || '—'}
           </div>
         </div>
+
+        <div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Telefon raqam</div>
+          <div className="font-medium text-slate-900 dark:text-slate-100">
+            {user.phone || '—'}
+          </div>
+        </div>
       </div>
 
       <form action="/api/logout" method="post">

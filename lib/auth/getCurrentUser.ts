@@ -12,7 +12,7 @@ export async function getCurrentUser() {
 
   const { data: user } = await supabase
     .from('users')
-    .select('id, username, first_name')
+    .select('id, username, first_name, phone')
     .eq('id', userId)
     .single();
 
