@@ -7,13 +7,12 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const update = await req.json();
 
-  // If this is a login message → await it
-  if (update?.message?.text?.includes('login_')) {
-    await processUpdate(update);
-  } else {
-    processUpdate(update).catch(console.error);
-  }
+  // Always process async, never block response
+  processUpdate(update).catch(err => {
+    console.error('[telegram webhook]', err);
+  });
 
+  // Telegram MUST get 200 OK immediately
   return NextResponse.json({ ok: true }, { status: 200 });
 }
 
@@ -60,52 +59,48 @@ if (message.contact) {
   });
 
   // MAGIC LOGIN
-  if (text.startsWith('/start login_') || text.includes('login_')) {
-    const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
-    if (!token) return;
+ // MAGIC LOGIN
+if (text.startsWith('/start login_') || text.includes('login_')) {
+  const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
+  if (!token) return;
 
-    const { data: loginToken } = await supabase
-      .from('telegram_login_tokens')
-      .select('*')
-      .eq('token', token)
-      .eq('used', false)
-      .gt('expires_at', new Date().toISOString())
-      .single();
+  const { data: loginToken } = await supabase
+    .from('telegram_login_tokens')
+    .select('*')
+    .eq('token', token)
+    .eq('used', false)
+    .gt('expires_at', new Date().toISOString())
+    .single();
 
-    if (!loginToken) {
-      await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
-      return;
-    }
-
-    if (loginToken.used && loginToken.telegram_id) {
-      // OK
-    } else {
-      return NextResponse.json({ loggedIn: false });
-    }
-
-    await supabase
-  .from('telegram_login_tokens')
-  .update({
-    used: true,
-    telegram_id: user.id,
-  })
-  .eq('id', loginToken.id);
-
-// 🔍 Check if phone exists
-const { data: tgUser } = await supabase
-  .from('telegram_users')
-  .select('phone')
-  .eq('telegram_id', user.id)
-  .single();
-
-if (!tgUser?.phone) {
-  await requestPhone(chatId);
-} else {
-  await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
-}
-
-return;
+  if (!loginToken) {
+    await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
+    return;
   }
+
+  // ✅ MARK TOKEN AS USED (THIS UNBLOCKS WEBSITE LOGIN)
+  await supabase
+    .from('telegram_login_tokens')
+    .update({
+      used: true,
+      telegram_id: user.id,
+    })
+    .eq('id', loginToken.id);
+
+  // 🔍 Check if phone exists
+  const { data: tgUser } = await supabase
+    .from('telegram_users')
+    .select('phone')
+    .eq('telegram_id', user.id)
+    .single();
+
+  if (!tgUser?.phone) {
+    await requestPhone(chatId);
+  } else {
+    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
+  }
+
+  return;
+}
 
   await sendMessage(
     chatId,
