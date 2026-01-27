@@ -32,7 +32,7 @@ export default async function ProfilePage() {
         <div>
           <div className="text-sm text-gray-500 dark:text-gray-400">Telefon raqam</div>
           <div className="font-medium text-slate-900 dark:text-slate-100">
-            {user.phone || '—'}
+            {user.phone || 'Telefon raqam kiritilmagan'}
           </div>
         </div>
       </div>

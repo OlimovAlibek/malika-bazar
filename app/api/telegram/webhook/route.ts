@@ -34,10 +34,13 @@ async function processUpdate(update: any) {
     const phone = message.contact.phone_number;
     const telegramId = user.id;
 
+    // Upsert to avoid losing phone if the user row doesn't exist yet
     await supabase
       .from('telegram_users')
-      .update({ phone })
-      .eq('telegram_id', telegramId);
+      .upsert(
+        { telegram_id: telegramId, phone },
+        { onConflict: 'telegram_id' }
+      );
 
     await sendMessage(
       chatId,

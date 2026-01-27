@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseService } from '@/lib/supabase/service';
 
 
 
@@ -9,7 +9,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ loggedIn: false });
   }
 
-  const supabase = await createClient();
+  // Use service role for reliability (RLS-safe) — cookie is still set manually below.
+  const supabase = supabaseService;
 
   // First, check if token exists and is used
   const { data: loginToken, error: tokenError } = await supabase
@@ -28,6 +29,12 @@ export async function POST(req: Request) {
 
   if (!loginToken) {
     console.log('[telegram/check] Token not found in database');
+    return NextResponse.json({ loggedIn: false });
+  }
+
+  // Expired token → treat as not logged in
+  if (loginToken.expires_at && new Date(loginToken.expires_at).getTime() <= Date.now()) {
+    console.log('[telegram/check] Token expired');
     return NextResponse.json({ loggedIn: false });
   }
 
