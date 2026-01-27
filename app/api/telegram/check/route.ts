@@ -43,15 +43,17 @@ export async function POST(req: Request) {
 
   const { data: tgUser } = await supabase
     .from('telegram_users')
-    .select('telegram_id, username, first_name')
+    .select('telegram_id, username, first_name, phone')
     .eq('telegram_id', loginToken.telegram_id)
     .single();
 
   if (!tgUser) {
+    console.log('[telegram/check] Telegram user not found');
     return NextResponse.json({ loggedIn: false });
   }
 
-  // Upsert user - specify telegram_id as conflict target
+  // Upsert user - include phone from telegram_users
+  // This ensures phone is available in users table for getCurrentUser()
   const { data: user, error: userError } = await supabase
     .from('users')
     .upsert(
@@ -59,6 +61,7 @@ export async function POST(req: Request) {
         telegram_id: tgUser.telegram_id,
         username: tgUser.username,
         first_name: tgUser.first_name,
+        phone: tgUser.phone || null, // Copy phone from telegram_users
       },
       {
         onConflict: 'telegram_id',
@@ -83,17 +86,20 @@ export async function POST(req: Request) {
 
   const response = NextResponse.json({ loggedIn: true });
 
+  // Set cookie with proper security settings
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   response.cookies.set({
     name: 'mb_user',
     value: String(user.id),
     httpOnly: true,
     path: '/',
     sameSite: 'lax',
-    secure: false,
-    maxAge: 60 * 60 * 24 * 30,
+    secure: isProduction, // Only secure in production (HTTPS required)
+    maxAge: 60 * 60 * 24 * 30, // 30 days
   });
 
-  console.log('[telegram/check] set mb_user cookie for user', user.id);
+  console.log('[telegram/check] ✅ Login successful, cookie set for user', user.id);
 
   return response;
 

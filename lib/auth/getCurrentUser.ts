@@ -10,6 +10,7 @@ export async function getCurrentUser() {
 
   const supabase = await createClient();
 
+  // Get user with phone from users table (phone is synced from telegram_users in /api/telegram/check)
   const { data: user } = await supabase
     .from('users')
     .select('id, username, first_name, phone')

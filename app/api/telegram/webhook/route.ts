@@ -24,30 +24,31 @@ async function processUpdate(update: any) {
   const message = update.message;
   if (!message || !message.from) return;
 
-  // 📞 PHONE SHARING HANDLER
-if (message.contact) {
-  const phone = message.contact.phone_number;
-  const telegramId = message.from.id;
-  const chatId = message.chat.id;
-
-  await supabaseService
-    .from('telegram_users')
-    .update({ phone })
-    .eq('telegram_id', telegramId);
-
-  await sendMessage(
-    chatId,
-    '✅ Rahmat! Telefon raqamingiz saqlandi.'
-  );
-
-  return;
-}
-
   const chatId = message.chat.id;
   const text = message.text;
   const user = message.from;
-
   const supabase = supabaseService;
+
+  // 📞 PHONE SHARING HANDLER (must be first, before text check)
+  if (message.contact) {
+    const phone = message.contact.phone_number;
+    const telegramId = user.id;
+
+    await supabase
+      .from('telegram_users')
+      .update({ phone })
+      .eq('telegram_id', telegramId);
+
+    await sendMessage(
+      chatId,
+      '✅ Rahmat! Telefon raqamingiz saqlandi.'
+    );
+
+    return;
+  }
+
+  // Skip if no text (e.g., only contact was sent)
+  if (!text) return;
 
   // Save telegram user (non-blocking)
   await supabase.from('telegram_users').upsert({
@@ -59,48 +60,53 @@ if (message.contact) {
   });
 
   // MAGIC LOGIN
- // MAGIC LOGIN
-if (text.startsWith('/start login_') || text.includes('login_')) {
-  const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
-  if (!token) return;
+  if (text.startsWith('/start login_') || text.includes('login_')) {
+    const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
+    if (!token) {
+      await sendMessage(chatId, '👋 Salom! Login qilish uchun sayt orqali kirish tugmasidan foydalaning.');
+      return;
+    }
 
-  const { data: loginToken } = await supabase
-    .from('telegram_login_tokens')
-    .select('*')
-    .eq('token', token)
-    .eq('used', false)
-    .gt('expires_at', new Date().toISOString())
-    .single();
+    const { data: loginToken } = await supabase
+      .from('telegram_login_tokens')
+      .select('*')
+      .eq('token', token)
+      .eq('used', false)
+      .gt('expires_at', new Date().toISOString())
+      .single();
 
-  if (!loginToken) {
-    await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
+    if (!loginToken) {
+      await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
+      return;
+    }
+
+    // ✅ CRITICAL: MARK TOKEN AS USED FIRST (THIS UNBLOCKS WEBSITE LOGIN)
+    // This MUST happen before any phone logic - login is complete at this point
+    await supabase
+      .from('telegram_login_tokens')
+      .update({
+        used: true,
+        telegram_id: user.id,
+      })
+      .eq('id', loginToken.id);
+
+    // ✅ ALWAYS send success message (login is complete, regardless of phone)
+    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
+
+    // 🔍 OPTIONAL: Request phone if missing (non-blocking, doesn't affect login)
+    const { data: tgUser } = await supabase
+      .from('telegram_users')
+      .select('phone')
+      .eq('telegram_id', user.id)
+      .single();
+
+    if (!tgUser?.phone) {
+      // Request phone separately, login is already complete
+      await requestPhone(chatId);
+    }
+
     return;
   }
-
-  // ✅ MARK TOKEN AS USED (THIS UNBLOCKS WEBSITE LOGIN)
-  await supabase
-    .from('telegram_login_tokens')
-    .update({
-      used: true,
-      telegram_id: user.id,
-    })
-    .eq('id', loginToken.id);
-
-  // 🔍 Check if phone exists
-  const { data: tgUser } = await supabase
-    .from('telegram_users')
-    .select('phone')
-    .eq('telegram_id', user.id)
-    .single();
-
-  if (!tgUser?.phone) {
-    await requestPhone(chatId);
-  } else {
-    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
-  }
-
-  return;
-}
 
   await sendMessage(
     chatId,
