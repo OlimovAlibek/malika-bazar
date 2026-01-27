@@ -1,13 +1,24 @@
 import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabase/service';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+function json(data: Record<string, any>) {
+  return NextResponse.json(data, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  });
+}
+
 
 
 export async function POST(req: Request) {
   const { token } = await req.json();
-  const debug = process.env.NODE_ENV !== 'production';
   if (!token) {
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'missing_token' } : {}) });
+    return json({ loggedIn: false, reason: 'missing_token' });
   }
 
   // Use service role for reliability (RLS-safe) — cookie is still set manually below.
@@ -30,23 +41,23 @@ export async function POST(req: Request) {
 
   if (!loginToken) {
     console.log('[telegram/check] Token not found in database');
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'token_not_found' } : {}) });
+    return json({ loggedIn: false, reason: 'token_not_found' });
   }
 
   // Expired token → treat as not logged in
   if (loginToken.expires_at && new Date(loginToken.expires_at).getTime() <= Date.now()) {
     console.log('[telegram/check] Token expired');
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'token_expired' } : {}) });
+    return json({ loggedIn: false, reason: 'token_expired' });
   }
 
   if (!loginToken.used) {
     console.log('[telegram/check] Token exists but not yet marked as used by bot');
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'token_not_used_yet' } : {}) });
+    return json({ loggedIn: false, reason: 'token_not_used_yet' });
   }
 
   if (!loginToken.telegram_id) {
     console.log('[telegram/check] Token is used but missing telegram_id');
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'missing_telegram_id' } : {}) });
+    return json({ loggedIn: false, reason: 'missing_telegram_id' });
   }
 
   const { data: tgUser } = await supabase
@@ -56,8 +67,9 @@ export async function POST(req: Request) {
     .single();
 
   if (!tgUser) {
-    console.log('[telegram/check] Telegram user not found');
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'telegram_user_missing' } : {}) });
+    // IMPORTANT: Do NOT block website login on telegram_users existence.
+    // The webhook may upsert telegram_users slightly later, or it may fail independently.
+    console.log('[telegram/check] Telegram user not found; proceeding with minimal user');
   }
 
   // Upsert user - include phone from telegram_users
@@ -66,10 +78,10 @@ export async function POST(req: Request) {
     .from('users')
     .upsert(
       {
-        telegram_id: tgUser.telegram_id,
-        username: tgUser.username,
-        first_name: tgUser.first_name,
-        phone: tgUser.phone || null, // Copy phone from telegram_users
+        telegram_id: tgUser?.telegram_id ?? loginToken.telegram_id,
+        username: tgUser?.username ?? null,
+        first_name: tgUser?.first_name ?? null,
+        phone: tgUser?.phone ?? null, // Copy phone from telegram_users when available
       },
       {
         onConflict: 'telegram_id',
@@ -80,19 +92,19 @@ export async function POST(req: Request) {
 
   if (userError) {
     console.error('[telegram/check] User upsert error:', userError);
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'user_upsert_error', message: userError.message } : {}) });
+    return json({ loggedIn: false, reason: 'user_upsert_error', message: userError.message });
   }
 
   if (!user) {
     console.log('[telegram/check] User upsert returned null');
-    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'user_upsert_null' } : {}) });
+    return json({ loggedIn: false, reason: 'user_upsert_null' });
   }
 
   console.log('[telegram/check] User found/created:', user.id);
 
   
 
-  const response = NextResponse.json({ loggedIn: true });
+  const response = json({ loggedIn: true });
 
   // Set cookie with proper security settings
   const isProduction = process.env.NODE_ENV === 'production';

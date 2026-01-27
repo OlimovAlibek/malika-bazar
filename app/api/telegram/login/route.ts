@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseService } from '@/lib/supabase/service';
 
 export async function POST() {
-  const supabase = await createClient();
+  // Use service role so token insert/cleanup never fails due to RLS.
+  const supabase = supabaseService;
 
   await supabase
   .from('telegram_login_tokens')

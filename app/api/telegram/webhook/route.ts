@@ -5,14 +5,15 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const update = await req.json();
-
-  // Always process async, never block response
-  processUpdate(update).catch(err => {
+  // Telegram MUST always get 200 OK, even on errors.
+  // IMPORTANT: Avoid "fire-and-forget" background work on serverless (not reliable).
+  try {
+    const update = await req.json();
+    await processUpdate(update);
+  } catch (err) {
     console.error('[telegram webhook]', err);
-  });
+  }
 
-  // Telegram MUST get 200 OK immediately
   return NextResponse.json({ ok: true }, { status: 200 });
 }
 
