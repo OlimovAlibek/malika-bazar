@@ -72,8 +72,7 @@ export async function POST(req: Request) {
     console.log('[telegram/check] Telegram user not found; proceeding with minimal user');
   }
 
-  // Upsert user - include phone from telegram_users
-  // This ensures phone is available in users table for getCurrentUser()
+  // Upsert user (do NOT write phone into users — phone lives in telegram_users)
   const { data: user, error: userError } = await supabase
     .from('users')
     .upsert(
@@ -81,7 +80,6 @@ export async function POST(req: Request) {
         telegram_id: tgUser?.telegram_id ?? loginToken.telegram_id,
         username: tgUser?.username ?? null,
         first_name: tgUser?.first_name ?? null,
-        phone: tgUser?.phone ?? null, // Copy phone from telegram_users when available
       },
       {
         onConflict: 'telegram_id',

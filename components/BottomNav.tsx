@@ -1,6 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 // components/BottomNav.tsx (SERVER COMPONENT)
 import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 import BottomNavItem from './BottomNavItem';
+
+// components/BottomNav.tsx
+
 
 export default async function BottomNav() {
   const user = await getCurrentUser();
