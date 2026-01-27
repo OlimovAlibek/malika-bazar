@@ -5,8 +5,9 @@ import { supabaseService } from '@/lib/supabase/service';
 
 export async function POST(req: Request) {
   const { token } = await req.json();
+  const debug = process.env.NODE_ENV !== 'production';
   if (!token) {
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'missing_token' } : {}) });
   }
 
   // Use service role for reliability (RLS-safe) — cookie is still set manually below.
@@ -29,23 +30,23 @@ export async function POST(req: Request) {
 
   if (!loginToken) {
     console.log('[telegram/check] Token not found in database');
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'token_not_found' } : {}) });
   }
 
   // Expired token → treat as not logged in
   if (loginToken.expires_at && new Date(loginToken.expires_at).getTime() <= Date.now()) {
     console.log('[telegram/check] Token expired');
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'token_expired' } : {}) });
   }
 
   if (!loginToken.used) {
     console.log('[telegram/check] Token exists but not yet marked as used by bot');
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'token_not_used_yet' } : {}) });
   }
 
   if (!loginToken.telegram_id) {
     console.log('[telegram/check] Token is used but missing telegram_id');
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'missing_telegram_id' } : {}) });
   }
 
   const { data: tgUser } = await supabase
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
 
   if (!tgUser) {
     console.log('[telegram/check] Telegram user not found');
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'telegram_user_missing' } : {}) });
   }
 
   // Upsert user - include phone from telegram_users
@@ -79,12 +80,12 @@ export async function POST(req: Request) {
 
   if (userError) {
     console.error('[telegram/check] User upsert error:', userError);
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'user_upsert_error', message: userError.message } : {}) });
   }
 
   if (!user) {
     console.log('[telegram/check] User upsert returned null');
-    return NextResponse.json({ loggedIn: false });
+    return NextResponse.json({ loggedIn: false, ...(debug ? { reason: 'user_upsert_null' } : {}) });
   }
 
   console.log('[telegram/check] User found/created:', user.id);
