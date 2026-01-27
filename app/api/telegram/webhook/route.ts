@@ -7,14 +7,16 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const update = await req.json();
 
-  // ✅ IMMEDIATE RESPONSE TO TELEGRAM
-  // Do NOT await anything critical before this
-  processUpdate(update).catch(err => {
-    console.error('[telegram webhook async error]', err);
-  });
+  // If this is a login message → await it
+  if (update?.message?.text?.includes('login_')) {
+    await processUpdate(update);
+  } else {
+    processUpdate(update).catch(console.error);
+  }
 
   return NextResponse.json({ ok: true }, { status: 200 });
 }
+
 
 /* ===============================
    ASYNC PROCESSING (SAFE)
@@ -73,6 +75,12 @@ if (message.contact) {
     if (!loginToken) {
       await sendMessage(chatId, '❌ Login havolasi eskirgan yoki yaroqsiz.');
       return;
+    }
+
+    if (loginToken.used && loginToken.telegram_id) {
+      // OK
+    } else {
+      return NextResponse.json({ loggedIn: false });
     }
 
     await supabase
