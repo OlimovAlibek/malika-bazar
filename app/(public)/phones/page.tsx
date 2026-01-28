@@ -2,6 +2,10 @@ export const revalidate = 0;
 
 import { publicSupabase } from '@/lib/supabase/public';
 import { PhoneCard } from '@/components/PhoneCard';
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
+import { supabaseService } from '@/lib/supabase/service';
+
+
 
 
 type Props = {
@@ -18,6 +22,21 @@ export default async function PhonesPage({ searchParams }: Props) {
   const query = searchParams?.query ?? '';
   const brand = searchParams?.brand ?? '';
   const focus = searchParams?.focus === '1';
+
+  const user = await getCurrentUser();
+
+let favoriteProductIds = new Set<string>();
+
+if (user) {
+  const { data: favorites } = await supabaseService
+    .from('favorites')
+    .select('product_id')
+    .eq('user_id', user.id);
+
+  favorites?.forEach(f => {
+    favoriteProductIds.add(f.product_id);
+  });
+}
 
   let dbQuery = supabase
     .from('products')
@@ -160,6 +179,7 @@ export default async function PhonesPage({ searchParams }: Props) {
                 key={product.id}
                 id={product.id}
                 slug={product.slug || product.id}
+                liked={favoriteProductIds.has(product.id)}
                 brand={product.brand}
                 model={product.model}
                 storage_gb={product.storage_gb}

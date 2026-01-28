@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getCurrentUser } from '@/lib/auth/getCurrentUser';
+import FavoritesGrid from '@/components/FavoritesGrid';
+import Link from 'next/link';
+
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -45,6 +48,22 @@ export default async function ProfilePage() {
           Chiqish
         </button>
       </form>
+
+      <div className="space-y-3">
+        <Link
+          href="/favorites"
+          className="block rounded-xl border p-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+        >
+          ❤️ Sevimlilar
+        </Link>
+
+        <Link
+          href="/about"
+          className="block rounded-xl border p-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+        >
+          ℹ️ Biz haqimizda
+        </Link>
+      </div>
     </main>
   );
 }

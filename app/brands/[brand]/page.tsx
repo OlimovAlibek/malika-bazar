@@ -4,6 +4,12 @@ import type { Metadata } from 'next';
 import { publicSupabase } from '@/lib/supabase/public';
 import { PhoneCard } from '@/components/PhoneCard';
 
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
+import { supabaseService } from '@/lib/supabase/service';
+
+
+
+
 type Props = {
   params: {
     brand: string;
@@ -47,6 +53,21 @@ const { data: products } = await publicSupabase
    PAGE
 ========================= */
 export default async function BrandPage({ params }: Props) {
+
+  const user = await getCurrentUser();
+
+let favoriteProductIds = new Set<string>();
+
+if (user) {
+  const { data: favorites } = await supabaseService
+    .from('favorites')  // ✅ FIX
+    .select('product_id')
+    .eq('user_id', user.id);
+
+  favorites?.forEach(f => {
+    favoriteProductIds.add(f.product_id);
+  });
+} 
   
     const brandSlug = params.brand.trim();
     const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/brands/${brandSlug}`;
@@ -125,6 +146,7 @@ const { data: products } = await publicSupabase
                 key={product.id}
                 id={product.id}
                 slug={product.slug || product.id}
+                liked={favoriteProductIds.has(product.id)}
                 brand={product.brand}
                 model={product.model}
                 storage_gb={product.storage_gb}

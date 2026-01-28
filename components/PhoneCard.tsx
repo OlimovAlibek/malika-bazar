@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { formatUpdatedAt } from '@/lib/formatUpdatedAt';
 import Link from 'next/link';
+import FavoriteButton from '@/components/FavoriteButton';
 
 type PhoneCardProps = {
   id: string;
@@ -14,6 +15,8 @@ type PhoneCardProps = {
   imageUrl?: string;
   updated_at?: string;
   variant?: 'grid' | 'list';
+  liked?: boolean; // ✅ ADD
+  onUnliked?: () => void;
 };
 
 
@@ -30,9 +33,17 @@ export function PhoneCard({
   imageUrl,
   updated_at,
   variant = 'grid',
+  liked = false,
+  onUnliked,
 }: PhoneCardProps) {
   return (
     <li className="list-none">
+      <div className="relative">
+      <FavoriteButton 
+      productId={id}
+    initialLiked={liked}
+    onUnliked={onUnliked}
+    />
       <Link
         href={`/phones/${slug}`}
         className="block bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-3 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-none hover:border-emerald-200 dark:hover:border-emerald-600 transition-all cursor-pointer no-underline"
@@ -106,7 +117,7 @@ export function PhoneCard({
         </div>
         
       </Link>
-      
+      </div>
     </li>
   );
 }
