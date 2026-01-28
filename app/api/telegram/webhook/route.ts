@@ -1,4 +1,4 @@
-const ADMIN_GROUP_ID = 3764873609;
+const ADMIN_GROUP_ID = -3764873609;
 
 import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabase/service';
