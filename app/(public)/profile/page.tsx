@@ -65,6 +65,14 @@ export default async function ProfilePage() {
           ℹ️ Biz haqimizda
         </Link>
 
+        <Link
+          href="https://t.me/tezkubot"
+          target="_blank"
+          className="block rounded-xl border p-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
+        >
+          ℹ️ Murojaat qilish
+        </Link>
+
         
       </div>
 

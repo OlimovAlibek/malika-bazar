@@ -100,6 +100,71 @@ if (
     source: text.includes('login_') ? 'magic_login' : 'direct',
   });
 
+  // ===============================
+// 📢 ADMIN BROADCAST
+// ===============================
+const ADMIN_IDS = [1057368365]; // <-- PUT YOUR TELEGRAM ID HERE
+
+if (text?.startsWith('/broadcast')) {
+  // ❌ Not admin → ignore silently
+  if (!ADMIN_IDS.includes(user.id)) {
+    return;
+  }
+
+  const broadcastText = text.replace('/broadcast', '').trim();
+
+  if (!broadcastText) {
+    await sendMessage(
+      chatId,
+      '❌ Xabar yozilmadi.\n\nMisol:\n/broadcast Salom hammaga!'
+    );
+    return;
+  }
+
+  const { data: users } = await supabase
+    .from('telegram_users')
+    .select('telegram_id')
+    .eq('is_active', true);
+
+  if (!users || users.length === 0) {
+    await sendMessage(chatId, '❌ Foydalanuvchilar topilmadi.');
+    return;
+  }
+
+  const token = process.env.TELEGRAM_BOT_TOKEN!;
+  let success = 0;
+  let failed = 0;
+
+  for (const u of users) {
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${token}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: u.telegram_id,
+            text: broadcastText,
+            parse_mode: 'HTML',
+          }),
+        }
+      );
+
+      if (res.ok) success++;
+      else failed++;
+    } catch {
+      failed++;
+    }
+  }
+
+  await sendMessage(
+    chatId,
+    `✅ Xabar yuborildi\n\n📤 Yuborildi: ${success}\n❌ Xato: ${failed}`
+  );
+
+  return;
+}
+
   // MAGIC LOGIN
   if (text.startsWith('/start login_') || text.includes('login_')) {
     const token = text.split('login_')[1]?.trim().split(/\s+/)[0];
