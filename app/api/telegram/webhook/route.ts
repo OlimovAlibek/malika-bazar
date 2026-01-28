@@ -1,3 +1,5 @@
+const ADMIN_GROUP_ID = 3764873609;
+
 import { NextResponse } from 'next/server';
 import { supabaseService } from '@/lib/supabase/service';
 
@@ -29,6 +31,41 @@ async function processUpdate(update: any) {
   const text = message.text;
   const user = message.from;
   const supabase = supabaseService;
+
+  // ===============================
+// 🧑‍💼 ADMIN REPLY HANDLER
+// ===============================
+if (
+  message.chat.id === ADMIN_GROUP_ID &&
+  message.reply_to_message?.text
+) {
+  const replyText = message.text;
+  const original = message.reply_to_message.text;
+
+  // Extract telegram_id from forwarded message
+  const match = original.match(/ID:(\d+)/);
+  if (!match) return;
+
+  const telegramId = Number(match[1]);
+
+  // Save admin reply
+  await supabase
+    .from('support_messages')
+    .update({
+      admin_reply: replyText,
+      replied_at: new Date().toISOString(),
+    })
+    .eq('telegram_id', telegramId)
+    .is('admin_reply', null);
+
+  // Send reply to user
+  await sendMessage(
+    telegramId,
+    `🧑‍💼 Yordam markazi:\n\n${replyText}`
+  );
+
+  return;
+}
 
   // 📞 PHONE SHARING HANDLER (must be first, before text check)
   if (message.contact) {
@@ -112,10 +149,31 @@ async function processUpdate(update: any) {
     return;
   }
 
-  await sendMessage(
-    chatId,
-    '👋 Salom! Login qilish uchun sayt orqali kirish tugmasidan foydalaning.'
-  );
+  // ===============================
+// 💬 USER SUPPORT MESSAGE
+// ===============================
+await supabase.from('support_messages').insert({
+  telegram_id: user.id,
+  chat_id: chatId,
+  user_message: text,
+});
+
+await sendMessage(
+  chatId,
+  '📨 Xabaringiz qabul qilindi. Tez orada javob beramiz.'
+);
+
+// Forward to admin group
+await sendMessage(
+  ADMIN_GROUP_ID,
+  `📩 YANGI MUROJAAT\n\n` +
+  `👤 ${user.first_name ?? 'User'}\n` +
+  `🔗 @${user.username ?? 'no_username'}\n` +
+  `🆔 ID:${user.id}\n\n` +
+  `💬 ${text}`
+);
+
+return;
 }
 
 /* ===============================

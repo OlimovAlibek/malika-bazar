@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 import FavoritesGrid from '@/components/FavoritesGrid';
 import Link from 'next/link';
+import SocialLinks from '@/components/SocialLinks';
 
 
 export default async function ProfilePage() {
@@ -63,6 +64,12 @@ export default async function ProfilePage() {
         >
           ℹ️ Biz haqimizda
         </Link>
+
+        
+      </div>
+
+      <div className="flex justify-center">
+        <SocialLinks />
       </div>
     </main>
   );
