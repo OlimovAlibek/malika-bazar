@@ -23,6 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uz">
+
+      <meta name="google-site-verification" content="YmNM5PuMUFYkM34gl-Au9kQWEls8VdV_vSyfYyiiazE" />
+
       
       <body className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors">
       <ThemeProvider>
