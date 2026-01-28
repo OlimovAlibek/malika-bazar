@@ -6,6 +6,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Tezku — Malika bozori telefon narxlari",
   description: "Tezku — Malika bozoridagi telefon narxlari. Eng so'nggi narxlar, solishtirish va qidiruv.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-32x32.png', type: 'image/png' },
+      { url: '/favicon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
