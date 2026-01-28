@@ -13,40 +13,53 @@ export default function TelegramLoginClient() {
     setToken(null);
     setUrl(null);
     setLoading(true);
-
+  
     const res = await fetch('/api/telegram/login', {
       method: 'POST',
       credentials: 'include',
     });
-
+  
     const data = await res.json();
+  
     setToken(data.token);
     setUrl(data.telegram_url);
     setLoading(false);
     setChecking(true);
+  
+    // ✅ AUTO OPEN TELEGRAM (KEY UX FIX)
+    if (data.telegram_url) {
+      window.location.href = data.telegram_url;
+    }
   }
 
   useEffect(() => {
     if (!token) return;
-
-    const interval = setInterval(async () => {
+  
+    const checkLogin = async () => {
       const res = await fetch('/api/telegram/check', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       });
-
+  
       const data = await res.json();
-
+  
       if (data.loggedIn) {
-        clearInterval(interval);
-        console.log('[telegram/check] loggedIn=true; redirecting to /');
-        window.location.href = '/';
+        window.location.href = '/profile';
       }
-    }, 2000);
-
-    return () => clearInterval(interval);
+    };
+  
+    const interval = setInterval(checkLogin, 2000);
+  
+    // ✅ SIMPLE & SAFE: re-check when tab becomes active
+    const onFocus = () => checkLogin();
+    window.addEventListener('focus', onFocus);
+  
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [token]);
 
   return (
@@ -60,7 +73,7 @@ export default function TelegramLoginClient() {
         {checking ? 'Tekshirilmoqda...' : 'Login with Telegram'}
       </button>
 
-      {url && (
+      {/* {url && (
         <a
           href={url}
           target="_blank"
@@ -69,7 +82,7 @@ export default function TelegramLoginClient() {
         >
           Open Telegram to confirm login
         </a>
-      )}
+      )} */}
     </div>
   );
 }

@@ -29,7 +29,6 @@ export default function RootLayout({
       
       <body className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors">
       <ThemeProvider>
-        <DarkModeToggle />
         {children}
         </ThemeProvider>
         </body>

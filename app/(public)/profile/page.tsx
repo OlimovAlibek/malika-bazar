@@ -1,26 +1,55 @@
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { getCurrentUser } from '@/lib/auth/getCurrentUser';
-import FavoritesGrid from '@/components/FavoritesGrid';
 import Link from 'next/link';
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 import SocialLinks from '@/components/SocialLinks';
-
+import TelegramLoginClient from '@/components/TelegramLoginClient';
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
 
-  // 🚫 Not logged in → redirect to home
+  // ============================
+  // 🔐 NOT LOGGED IN VIEW
+  // ============================
   if (!user) {
-    redirect('/');
+    return (
+      <main className="max-w-xl mx-auto p-4 space-y-6">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+          Profil
+        </h1>
+
+        <div className="border border-gray-200 dark:border-slate-700 rounded-2xl p-6 bg-white dark:bg-slate-800 text-center space-y-4">
+          <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Profilga kirish
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Sevimlilarni saqlash, telefonlarni kuzatish va qo‘shimcha
+            imkoniyatlardan foydalanish uchun tizimga kiring.
+          </p>
+
+          <TelegramLoginClient/>
+        </div>
+
+        <div className="flex justify-center">
+          <SocialLinks />
+        </div>
+      </main>
+    );
   }
 
+  // ============================
+  // 👤 LOGGED IN VIEW (UNCHANGED)
+  // ============================
   return (
     <main className="max-w-xl mx-auto p-4 space-y-4">
-      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Profil</h1>
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+        Profil
+      </h1>
 
       <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-2 bg-white dark:bg-slate-800">
         <div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Telegram username</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Telegram username
+          </div>
           <div className="font-medium text-slate-900 dark:text-slate-100">
             {user.username ? `@${user.username}` : '—'}
           </div>
@@ -34,7 +63,9 @@ export default async function ProfilePage() {
         </div>
 
         <div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Telefon raqam</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Telefon raqam
+          </div>
           <div className="font-medium text-slate-900 dark:text-slate-100">
             {user.phone || 'Telefon raqam kiritilmagan'}
           </div>
@@ -70,10 +101,8 @@ export default async function ProfilePage() {
           target="_blank"
           className="block rounded-xl border p-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
         >
-          ℹ️ Murojaat qilish
+          💬 Murojaat qilish
         </Link>
-
-        
       </div>
 
       <div className="flex justify-center">

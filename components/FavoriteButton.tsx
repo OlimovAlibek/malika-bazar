@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useOptimistic, useTransition } from 'react';
+import { useOptimistic, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Heart, Loader2 } from 'lucide-react';
 
 type Props = {
   productId: string;
@@ -17,7 +18,7 @@ export default function FavoriteButton({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // ✅ Optimistic state (this is the KEY)
+  // Optimistic state
   const [optimisticLiked, toggleOptimistic] = useOptimistic(
     initialLiked,
     (state) => !state
@@ -27,7 +28,7 @@ export default function FavoriteButton({
     e.preventDefault();
     e.stopPropagation();
 
-    // ⚡ INSTANT UI CHANGE
+    // Instant UI feedback
     toggleOptimistic(null);
 
     startTransition(async () => {
@@ -44,13 +45,11 @@ export default function FavoriteButton({
 
       const data = await res.json();
 
-      // ✅ If unliked on favorites page → remove from list
       if (!data.liked && onUnliked) {
         onUnliked();
         return;
       }
 
-      // Else just refresh server components
       router.refresh();
     });
   }
@@ -61,18 +60,28 @@ export default function FavoriteButton({
       aria-label="Sevimlilarga qo‘shish"
       className="
         absolute top-2 right-2 z-10
-        rounded-full bg-white/90 dark:bg-slate-900/90
-        backdrop-blur border border-gray-200 dark:border-slate-700
-        p-2 shadow-sm
-        transition active:scale-95
+        w-9 h-9
+        flex items-center justify-center
+        rounded-full
+        bg-white/90 dark:bg-slate-900/90
+        backdrop-blur
+        border border-gray-200 dark:border-slate-700
+        shadow-sm
+        transition
+        active:scale-95
+        hover:bg-white dark:hover:bg-slate-800
       "
     >
       {isPending ? (
-        <span className="animate-spin text-gray-400">⟳</span>
-      ) : optimisticLiked ? (
-        <span className="text-red-500 text-lg">❤️</span>
+        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
       ) : (
-        <span className="text-gray-400 text-lg">🤍</span>
+        <Heart
+          className={`w-5 h-5 transition ${
+            optimisticLiked
+              ? 'fill-rose-500 text-rose-500'
+              : 'text-gray-400'
+          }`}
+        />
       )}
     </button>
   );

@@ -197,7 +197,7 @@ if (text?.startsWith('/broadcast')) {
       .eq('id', loginToken.id);
 
     // ✅ ALWAYS send success message (login is complete, regardless of phone)
-    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting.');
+    await sendMessage(chatId, '✅ Login muvaffaqiyatli! Endi saytga qayting: tezku.uz');
 
     // 🔍 OPTIONAL: Request phone if missing (non-blocking, doesn't affect login)
     const { data: tgUser } = await supabase
