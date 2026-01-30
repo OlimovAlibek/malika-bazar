@@ -188,7 +188,7 @@ if (user) {
                 shopName={shop.name}
                 shopNumber={shop.shop_number}
                 imageUrl={imageUrl}
-                variant="list"
+                // variant="list"
               />
             );
           })}

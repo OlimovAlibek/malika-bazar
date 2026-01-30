@@ -66,7 +66,7 @@ export default function FavoritesGrid() {
             shopName={shop.name}
             shopNumber={shop.shop_number}
             imageUrl={imageUrl}
-            variant="grid"
+            // variant="grid"
             liked={true}
             onUnliked={() => {
                 // ✅ REMOVE FROM UI IMMEDIATELY

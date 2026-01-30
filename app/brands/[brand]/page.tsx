@@ -155,7 +155,7 @@ const { data: products } = await publicSupabase
                 shopName={shop.name}
                 shopNumber={shop.shop_number}
                 imageUrl={imageUrl}
-                variant="grid"
+                // variant="grid"
               />
             );
           })}
