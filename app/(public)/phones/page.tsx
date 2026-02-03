@@ -39,24 +39,26 @@ if (user) {
 }
 
   let dbQuery = supabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      brand,
-      model,
-      storage_gb,
-      price_uzs,
-      updated_at,
-      shop:shops!inner (
-        name,
-        shop_number
-      ),
-      product_images (
+  .from('products')
+  .select(`
+    id,
+    slug,
+    brand,
+    model,
+    storage_gb,
+    price_uzs,
+    updated_at,
+    shop:shops!inner (
+      name,
+      room:rooms (
+        code
+      )
+    ),
+    product_images (
       image_url
-)
-    `)
-    .eq('is_active', true);
+    )
+  `)
+  .eq('is_active', true);
 
   if (query) {
     dbQuery = dbQuery.or(
@@ -174,6 +176,7 @@ if (user) {
             const imageUrl = Array.isArray(product.product_images) && product.product_images[0] 
               ? product.product_images[0].image_url 
               : undefined;
+            const roomCode = shop?.room ? (Array.isArray(shop.room) ? shop.room[0]?.code : (shop.room as any)?.code) : undefined;
             return (
               <PhoneCard
                 key={product.id}
@@ -186,7 +189,7 @@ if (user) {
                 price_uzs={product.price_uzs}
                 updated_at={product.updated_at}
                 shopName={shop.name}
-                shopNumber={shop.shop_number}
+                roomCode={roomCode}  
                 imageUrl={imageUrl}
                 // variant="list"
               />

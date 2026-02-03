@@ -10,7 +10,10 @@ export async function GET() {
   const userId = cookieStore.get('mb_user')?.value;
 
   if (!userId) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'unauthorized' },
+      { status: 401 }
+    );
   }
 
   const supabase = supabaseService;
@@ -28,7 +31,9 @@ export async function GET() {
         updated_at,
         shop:shops!inner (
           name,
-          shop_number
+          room:rooms (
+            code
+          )
         ),
         product_images (
           image_url
@@ -40,9 +45,13 @@ export async function GET() {
 
   if (error) {
     console.error('[favorites/list]', error);
-    return NextResponse.json({ error: 'failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'failed' },
+      { status: 500 }
+    );
   }
 
+  // normalize result
   const products = data.map((row: any) => row.product);
 
   return NextResponse.json({ products });

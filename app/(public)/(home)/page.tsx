@@ -47,7 +47,12 @@ export default async function HomePage({ searchParams }: Props) {
     storage_gb,
     price_uzs,
     updated_at,
-    shop:shops!inner ( name, shop_number ),
+    shop:shops!inner (
+      name,
+      room:rooms (
+        code
+      )
+    ),
     product_images ( image_url )
   `)
   .eq('is_active', true);
@@ -83,19 +88,19 @@ const { data: products } = await query.order('price_uzs', {
     <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
       {/* HEADER */}
       <div className="bg-white dark:bg-slate-900 border-b">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto px-4 py- flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo.jpeg"
+              src="/tezku-logo-16x9-removebg-preview.png"
               alt="Tezku"
-              width={44}
-              height={44}
-              className="rounded-full"
+              width={130}
+              height={10}
+              className=""
             />
-            <div>
+            {/* <div>
               <div className="font-bold text-base">TEZKU</div>
               <div className="text-xs text-gray-500">Malika bozor</div>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-2">
@@ -164,6 +169,7 @@ const { data: products } = await query.order('price_uzs', {
           {products?.map(p => {
             const shop = Array.isArray(p.shop) ? p.shop[0] : p.shop;
             const imageUrl = p.product_images?.[0]?.image_url;
+            const room = Array.isArray(shop.room) ? shop.room[0] : shop.room;
 
             return (
               <PhoneCard
@@ -176,7 +182,7 @@ const { data: products } = await query.order('price_uzs', {
                 price_uzs={p.price_uzs}
                 updated_at={p.updated_at}
                 shopName={shop.name}
-                shopNumber={shop.shop_number}
+                roomCode={room?.code}
                 imageUrl={imageUrl}
                 liked={favoriteIds.has(p.id)}
               />

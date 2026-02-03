@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import EditShopForm from './EditShopForm';
+import { notFound } from 'next/navigation';
 
 type Props = {
   params: { id: string };
@@ -8,6 +9,7 @@ type Props = {
 export default async function EditShopPage({ params }: Props) {
   const supabase = await createClient();
 
+  // 1️⃣ Get shop
   const { data: shop, error } = await supabase
     .from('shops')
     .select('*')
@@ -15,8 +17,19 @@ export default async function EditShopPage({ params }: Props) {
     .single();
 
   if (error || !shop) {
-    return <div>Shop not found</div>;
+    notFound();
   }
 
-  return <EditShopForm shop={shop} />;
+  // 2️⃣ Get rooms (THIS WAS MISSING)
+  const { data: rooms } = await supabase
+    .from('rooms')
+    .select('id, code')
+    .order('code');
+
+  return (
+    <EditShopForm
+      shop={shop}
+      rooms={rooms || []}   // ✅ THIS PREVENTS CRASH
+    />
+  );
 }

@@ -29,7 +29,7 @@ npm run dev
 ### SHOPS
 - id
 - name
-- shop_number (required, unique)
+<!-- - shop_number (required, unique) -->
 - phone_number
 - telegram_username
 - created_at

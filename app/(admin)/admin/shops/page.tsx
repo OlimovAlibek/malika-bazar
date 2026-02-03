@@ -5,8 +5,15 @@ export default async function AdminShopsPage() {
 
   const { data: shops } = await supabase
     .from('shops')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select(`
+      id,
+      name,
+      phone_number,
+      room:rooms (
+        code
+      )
+    `)
+    .order('name', { ascending: true });
 
   return (
     <div className="space-y-4">
@@ -23,21 +30,26 @@ export default async function AdminShopsPage() {
         {shops?.map((shop) => (
           <li
             key={shop.id}
-            className="border p-3 rounded"
+            className="border p-3 rounded space-y-1"
           >
             <div className="font-medium">
               {shop.name}
             </div>
+
             <div className="text-sm text-gray-600">
-              Shop {shop.shop_number} — {shop.phone_number}
+              {shop.room?.[0]?.code
+                ? `Xona ${shop.room[0].code}`
+                : 'Xona belgilanmagan'}
+              {' — '}
+              {shop.phone_number}
             </div>
-            
+
             <a
-  href={`/admin/shops/${shop.id}/edit`}
-  className="text-sm underline"
->
-  Edit
-</a>
+              href={`/admin/shops/${shop.id}/edit`}
+              className="text-sm underline"
+            >
+              Edit
+            </a>
           </li>
         ))}
       </ul>

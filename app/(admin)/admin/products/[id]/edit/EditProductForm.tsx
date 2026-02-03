@@ -4,9 +4,17 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
+type Shop = {
+  id: string;
+  name: string;
+  room?: {
+    code: string;
+  } | null;
+};
+
 type Props = {
   product: any;
-  shops: any[];
+  shops: Shop[];
 };
 
 export default function EditProductForm({ product, shops }: Props) {
@@ -34,7 +42,7 @@ export default function EditProductForm({ product, shops }: Props) {
       })
       .eq('id', product.id);
 
-    // 2️⃣ Replace image if new one uploaded
+    // 2️⃣ Replace image if uploaded
     if (image) {
       const fileExt = image.name.split('.').pop();
       const filePath = `${product.id}.${fileExt}`;
@@ -47,7 +55,6 @@ export default function EditProductForm({ product, shops }: Props) {
         .from('product-images')
         .getPublicUrl(filePath);
 
-      // Update or insert image row
       if (currentImage) {
         await supabase
           .from('product_images')
@@ -73,11 +80,11 @@ export default function EditProductForm({ product, shops }: Props) {
       {currentImage && (
         <div className="relative w-full h-40 rounded bg-gray-100 overflow-hidden">
           <Image
-          src={currentImage}
+            src={currentImage}
             alt="Product preview"
             fill
             className="object-contain"
-        />
+          />
         </div>
       )}
 
@@ -87,6 +94,7 @@ export default function EditProductForm({ product, shops }: Props) {
         onChange={(e) => setImage(e.target.files?.[0] || null)}
       />
 
+      {/* Shop selector */}
       <select
         className="border p-2 w-full"
         value={shopId}
@@ -94,7 +102,7 @@ export default function EditProductForm({ product, shops }: Props) {
       >
         {shops.map((shop) => (
           <option key={shop.id} value={shop.id}>
-            {shop.name} — {shop.shop_number}
+            {shop.name} — Xona {shop.room?.code ?? '—'}
           </option>
         ))}
       </select>
@@ -131,7 +139,7 @@ export default function EditProductForm({ product, shops }: Props) {
 
       <button
         onClick={save}
-        className="bg-black text-white p-2 w-full"
+        className="bg-black text-white p-2 w-full rounded"
       >
         Save Changes
       </button>

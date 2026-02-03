@@ -17,11 +17,13 @@ export default async function AdminProductsPage() {
       is_active,
       shop:shops (
         name,
-        shop_number
+        room:rooms (
+          code
+        )
       ),
       product_images (
-  image_url
-)
+        image_url
+      )
     `)
     .order('created_at', { ascending: false });
 
@@ -40,43 +42,47 @@ export default async function AdminProductsPage() {
         {products?.map((product) => (
           <li
             key={product.id}
-            className="border p-3 rounded flex justify-between items-center"
+            className="border p-3 rounded space-y-2"
           >
             {product.product_images?.[0]?.image_url && (
-                <div className="relative w-full h-40 mb-2 rounded overflow-hidden">
-                  <Image
-                    src={product.product_images[0].image_url}
-                    alt={`${product.brand} ${product.model}`}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              )}
+              <div className="relative w-full h-40 rounded overflow-hidden">
+                <Image
+                  src={product.product_images[0].image_url}
+                  alt={`${product.brand} ${product.model}`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            )}
+
             <div>
               <div className="font-medium">
                 {product.brand} {product.model} {product.storage_gb}GB
               </div>
+
               <div className="text-sm text-gray-600">
-              {product.shop?.[0]?.name} — Shop {product.shop?.[0]?.shop_number}
+                {product.shop?.[0]?.name} — Xona {product.shop?.[0]?.room?.[0]?.code}
               </div>
             </div>
 
-            <InlinePriceEditor
-  productId={product.id}
-  price={product.price_uzs}
-/>
+            <div className="flex items-center gap-4">
+              <InlinePriceEditor
+                productId={product.id}
+                price={product.price_uzs}
+              />
 
-<ToggleActive
-  productId={product.id}
-  initialValue={product.is_active}
-/>
+              <ToggleActive
+                productId={product.id}
+                initialValue={product.is_active}
+              />
 
-<a
-  href={`/admin/products/${product.id}/edit`}
-  className="text-sm underline"
->
-  Edit
-</a>
+              <a
+                href={`/admin/products/${product.id}/edit`}
+                className="text-sm underline"
+              >
+                Edit
+              </a>
+            </div>
           </li>
         ))}
       </ul>

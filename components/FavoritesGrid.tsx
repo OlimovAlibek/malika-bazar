@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PhoneCard } from '@/components/PhoneCard';
 
-
-
 export default function FavoritesGrid() {
   const [products, setProducts] = useState<any[] | null>(null);
   const router = useRouter();
@@ -64,16 +62,15 @@ export default function FavoritesGrid() {
             price_uzs={product.price_uzs}
             updated_at={product.updated_at}
             shopName={shop.name}
-            shopNumber={shop.shop_number}
+            roomCode={shop.room?.code}
             imageUrl={imageUrl}
-            // variant="grid"
             liked={true}
             onUnliked={() => {
-                // ✅ REMOVE FROM UI IMMEDIATELY
-                setProducts(prev =>
-                  prev!.filter(p => p.id !== product.id)
-                );
-              }}
+              // ✅ remove instantly from UI
+              setProducts(prev =>
+                prev!.filter(p => p.id !== product.id)
+              );
+            }}
           />
         );
       })}

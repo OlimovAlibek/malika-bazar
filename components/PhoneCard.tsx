@@ -11,7 +11,7 @@ type Props = {
   storage_gb: number;
   price_uzs: number;
   shopName: string;
-  shopNumber: string;
+  roomCode?: string; // ✅ NEW (A-33)
   imageUrl?: string;
   updated_at?: string;
   liked?: boolean;
@@ -26,7 +26,7 @@ export function PhoneCard({
   storage_gb,
   price_uzs,
   shopName,
-  shopNumber,
+  roomCode,
   imageUrl,
   updated_at,
   liked = false,
@@ -83,9 +83,12 @@ export function PhoneCard({
             <span className="font-medium text-gray-600 dark:text-gray-300">
               {shopName}
             </span>
-            <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 font-mono">
-              #{shopNumber}
-            </span>
+
+            {roomCode && (
+              <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 font-mono">
+                {roomCode}
+              </span>
+            )}
           </div>
         </Link>
       </div>
