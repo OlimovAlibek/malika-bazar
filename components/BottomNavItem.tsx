@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Smartphone, User, LogIn } from 'lucide-react';
+import { Home, Smartphone, User, LogIn, Heart } from 'lucide-react';
 
 type Props = {
   href: string;
   label: string;
-  icon: 'home' | 'phones' | 'profile' | 'login';
+  icon: 'home' | 'phones' | 'profile' | 'login' | 'heart';
 };
 
 const ICONS = {
@@ -15,6 +15,7 @@ const ICONS = {
   phones: Smartphone,
   profile: User,
   login: LogIn,
+  heart: Heart,
 };
 
 export default function BottomNavItem({ href, label, icon }: Props) {

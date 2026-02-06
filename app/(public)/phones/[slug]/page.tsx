@@ -1,4 +1,4 @@
-export const revalidate = 3600;
+export const revalidate = 600;
 
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -8,6 +8,9 @@ import ProductActions from '@/components/ProductActions';
 import ShareButton from '@/components/ShareButton';
 import BackButton from '@/components/BackButton';
 import { PhoneCard } from '@/components/PhoneCard';
+import FavoriteButton from '@/components/FavoriteButton';
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
+import { supabaseService } from '@/lib/supabase/service';
 
 type Props = {
   params: {
@@ -81,6 +84,8 @@ export async function generateMetadata(
    PAGE
 ========================= */
 export default async function ProductDetailPage({ params }: Props) {
+
+  
   const { data: product, error } = await publicSupabase
     .from('products')
     .select(`
@@ -110,6 +115,7 @@ export default async function ProductDetailPage({ params }: Props) {
     .single();
 
 
+    
 
 
   if (error || !product) {
@@ -120,131 +126,84 @@ export default async function ProductDetailPage({ params }: Props) {
     );
   }
 
-  let similarProducts: any[] = [];
+  const user = await getCurrentUser();
 
-/* 1️⃣ Same brand + same storage */
-{
-  const { data } = await publicSupabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      brand,
-      model,
-      storage_gb,
-      price_uzs,
-      updated_at,
-      shop:shops!inner (
-        name,
-        slug,
-        room:rooms (
-          code
-        )
-      ),
-      product_images ( image_url )
-    `)
-    .eq('is_active', true)
-    .eq('brand', product.brand)
-    .eq('storage_gb', product.storage_gb)
-    .neq('id', product.id)
-    .limit(6);
+let isLiked = false;
 
-  similarProducts = data ?? [];
+if (user) {
+  const { data } = await supabaseService
+    .from('favorites')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('product_id', product.id)
+    .maybeSingle();
+
+  isLiked = !!data;
 }
 
-/* 2️⃣ Same brand (any storage) */
-if (similarProducts.length < 6) {
-  const { data } = await publicSupabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      brand,
-      model,
-      storage_gb,
-      price_uzs,
-      updated_at,
-      shop:shops!inner (
-        name,
-        slug,
-        room:rooms (
-          code
-        )
-      ),
-      product_images ( image_url )
-    `)
-    .eq('is_active', true)
-    .eq('brand', product.brand)
-    .neq('id', product.id)
-    .limit(6 - similarProducts.length);
+ // ==========================
+// SIMILAR PRODUCTS (OPTIMIZED)
+// ==========================
 
-  similarProducts = [...similarProducts, ...(data ?? [])];
-}
-
-/* 3️⃣ Same price range (±15%) */
-if (similarProducts.length < 6) {
-  const min = Math.floor(product.price_uzs * 0.85);
-  const max = Math.ceil(product.price_uzs * 1.15);
-
-  const { data } = await publicSupabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      brand,
-      model,
-      storage_gb,
-      price_uzs,
-      updated_at,
-      shop:shops!inner (
-        name,
-        slug,
-        room:rooms (
-          code
-        )
-      ),
-      product_images ( image_url )
-    `)
-    .eq('is_active', true)
-    .gte('price_uzs', min)
-    .lte('price_uzs', max)
-    .neq('id', product.id)
-    .limit(6 - similarProducts.length);
-
-  similarProducts = [...similarProducts, ...(data ?? [])];
-}
-
-/* 4️⃣ Absolute fallback (guaranteed) */
-if (similarProducts.length < 6) {
-  const { data } = await publicSupabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      brand,
-      model,
-      storage_gb,
-      price_uzs,
-      updated_at,
-      shop:shops!inner (
+// 1️⃣ Strict match: same brand + same storage
+const { data: strictMatches } = await publicSupabase
+.from('products')
+.select(`
   id,
-  name,
   slug,
-  phone_number,
-  telegram_username,
-  room:rooms!inner (
-    code
-  )
-),
-      product_images ( image_url )
-    `)
-    .eq('is_active', true)
-    .neq('id', product.id)
-    .order('price_uzs', { ascending: true })
-    .limit(6 - similarProducts.length);
+  brand,
+  model,
+  storage_gb,
+  price_uzs,
+  updated_at,
+  shop:shops!inner (
+    name,
+    slug,
+    room:rooms ( code )
+  ),
+  product_images ( image_url )
+`)
+.eq('is_active', true)
+.eq('brand', product.brand)
+.eq('storage_gb', product.storage_gb)
+.neq('id', product.id)
+.order('price_uzs', { ascending: true })
+.limit(6);
 
-  similarProducts = [...similarProducts, ...(data ?? [])];
-}
+// 2️⃣ Fallback pool (covers all remaining cases)
+const { data: fallbackPool } = await publicSupabase
+.from('products')
+.select(`
+  id,
+  slug,
+  brand,
+  model,
+  storage_gb,
+  price_uzs,
+  updated_at,
+  shop:shops!inner (
+    name,
+    slug,
+    room:rooms ( code )
+  ),
+  product_images ( image_url )
+`)
+.eq('is_active', true)
+.neq('id', product.id)
+.order('price_uzs', { ascending: true })
+.limit(20);
+
+// 3️⃣ Merge + deduplicate + cap at 6
+const seen = new Set<string>();
+
+const similarProducts = [
+...(strictMatches ?? []),
+...(fallbackPool ?? []),
+].filter((p) => {
+if (seen.has(p.id)) return false;
+seen.add(p.id);
+return true;
+}).slice(0, 6);
 
   
 
@@ -279,6 +238,17 @@ if (similarProducts.length < 6) {
     },
   };
 
+  const favoriteIds = new Set<string>();
+
+if (user) {
+  const { data } = await supabaseService
+    .from('favorites')
+    .select('product_id')
+    .eq('user_id', user.id);
+
+  data?.forEach(f => favoriteIds.add(f.product_id));
+}
+
   return (
     <>
       <script
@@ -289,9 +259,19 @@ if (similarProducts.length < 6) {
       <div className="max-w-xl mx-auto p-4 space-y-4">
         {/* Image */}
         {imageUrl && (
-          <div className="relative w-full h-64 rounded-xl bg-gray-100 dark:bg-slate-800">
+          <div className="relative w-full h-64 rounded-xl bg-gray-100 dark:bg-slate-800 overflow-hidden">
             <BackButton />
+
+            {/* ❤️ Favorite */}
+            <div className="absolute right-1 z-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur rounded-full">
+            <FavoriteButton
+              productId={product.id}
+              initialLiked={isLiked}
+            />
+            </div>
+
             <Image
+              priority
               src={imageUrl}
               alt={`${product.brand} ${product.model}`}
               fill
@@ -300,6 +280,7 @@ if (similarProducts.length < 6) {
             />
           </div>
         )}
+        
 
         {/* Title */}
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
@@ -321,6 +302,15 @@ if (similarProducts.length < 6) {
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {formatUpdatedAt(product.updated_at)}
         </div>
+
+        <section className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p>
+            Tezku orqali Malika bozorida {product.brand} {product.model}{' '}
+            {product.storage_gb}GB telefonining eng so‘nggi narxlarini
+            ko‘rishingiz mumkin. Narxlar do‘kon, xotira hajmi va
+            yangilanish vaqtiga qarab farq qiladi.
+          </p>
+        </section>
 
         {/* Shop info */}
 
@@ -382,14 +372,42 @@ if (similarProducts.length < 6) {
                     price_uzs={p.price_uzs}
                     updated_at={p.updated_at}
                     shopName={shop.name}
-                    roomCode={shop.room?.code}
+                    roomCode={room?.code}
                     imageUrl={imageUrl}
+                    liked={favoriteIds.has(p.id)}
                   />
                 );
               })}
             </ul>
           </section>
         )}
+
+        <section className="pt-6 border-t border-gray-200 dark:border-slate-700 space-y-3">
+          <h2 className="text-sm font-semibold">
+            Ko‘p so‘raladigan savollar
+          </h2>
+
+          <div className="text-xs text-gray-700 dark:text-gray-300">
+            <strong>
+              {product.brand} {product.model} narxi Malika bozorda arzonmi?
+            </strong>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Odatda Malika bozorida {product.brand} {product.model} narxi
+              rasmiy do‘konlarga qaraganda arzonroq bo‘ladi, chunki
+              sotuvchilar narxlarni mustaqil belgilaydi.
+            </p>
+          </div>
+
+          <div className="text-xs text-gray-700 dark:text-gray-300">
+            <strong>
+              {product.brand} {product.model} narxi tez-tez yangilanadimi?
+            </strong>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Ha, valyuta kursi va yetkazib berish sharoitlariga qarab
+              narxlar tez-tez o‘zgaradi. Tezku’da narxlar doim yangilanadi.
+            </p>
+          </div>
+        </section>
       </div>
     </>
   );

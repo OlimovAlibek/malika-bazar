@@ -1,197 +1,125 @@
-export const revalidate = 0;
+export const revalidate = 300;
 
 import { publicSupabase } from '@/lib/supabase/public';
 import { PhoneCard } from '@/components/PhoneCard';
 import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 import { supabaseService } from '@/lib/supabase/service';
-
-
-
+import PhonesToolbar from '@/components/PhonesToolbar';
+import ActiveFilters from '@/components/ActiveFilters';
 
 type Props = {
   searchParams?: {
     query?: string;
-    brand?: string;
-    focus?: string;
+    brand?: string;     // Apple,Samsung
+    min?: string;
+    max?: string;
+    storage?: string;
+    sort?: 'price_asc' | 'price_desc' | 'newest';
   };
 };
 
 export default async function PhonesPage({ searchParams }: Props) {
-  const supabase = publicSupabase;
-
-  const query = searchParams?.query ?? '';
-  const brand = searchParams?.brand ?? '';
-  const focus = searchParams?.focus === '1';
-
   const user = await getCurrentUser();
 
-let favoriteProductIds = new Set<string>();
+  /* ❤️ Favorites */
+  const favoriteIds = new Set<string>();
+  if (user) {
+    const { data } = await supabaseService
+      .from('favorites')
+      .select('product_id')
+      .eq('user_id', user.id);
 
-if (user) {
-  const { data: favorites } = await supabaseService
-    .from('favorites')
-    .select('product_id')
-    .eq('user_id', user.id);
+    data?.forEach(f => favoriteIds.add(f.product_id));
+  }
 
-  favorites?.forEach(f => {
-    favoriteProductIds.add(f.product_id);
-  });
-}
+  /* 🧠 BASE QUERY */
+  let q = publicSupabase
+    .from('products')
+    .select(`
+      id,
+      slug,
+      brand,
+      model,
+      storage_gb,
+      price_uzs,
+      updated_at,
+      shop:shops!inner (
+        name,
+        room:rooms ( code )
+      ),
+      product_images ( image_url )
+    `)
+    .eq('is_active', true);
 
-  let dbQuery = supabase
-  .from('products')
-  .select(`
-    id,
-    slug,
-    brand,
-    model,
-    storage_gb,
-    price_uzs,
-    updated_at,
-    shop:shops!inner (
-      name,
-      room:rooms (
-        code
-      )
-    ),
-    product_images (
-      image_url
-    )
-  `)
-  .eq('is_active', true);
-
-  if (query) {
-    dbQuery = dbQuery.or(
-      `brand.ilike.%${query}%,model.ilike.%${query}%`
+  /* 🔍 SEARCH */
+  if (searchParams?.query) {
+    q = q.or(
+      `brand.ilike.%${searchParams.query}%,model.ilike.%${searchParams.query}%`
     );
   }
 
-  if (brand) {
-    dbQuery = dbQuery.eq('brand', brand);
+  /* 🏷 MULTI BRAND */
+  if (searchParams?.brand) {
+    q = q.in('brand', searchParams.brand.split(','));
   }
 
-  const { data: products, error } = await dbQuery.order(
-    'price_uzs',
-    { ascending: true }
-  );
-
-  if (error) {
-    return <div className="text-slate-900 dark:text-slate-100">Xatolik yuz berdi</div>;
+  /* 💾 STORAGE */
+  if (searchParams?.storage) {
+    q = q.eq('storage_gb', Number(searchParams.storage));
   }
+
+  /* 💰 PRICE */
+  if (searchParams?.min) q = q.gte('price_uzs', Number(searchParams.min));
+  if (searchParams?.max) q = q.lte('price_uzs', Number(searchParams.max));
+
+  /* 🔀 SORT */
+  if (searchParams?.sort === 'newest') {
+    q = q.order('updated_at', { ascending: false });
+  } else {
+    q = q.order('price_uzs', {
+      ascending: searchParams?.sort !== 'price_desc',
+    });
+  }
+
+  const { data: products } = await q.limit(60); // hard limit for perf
 
   return (
-    <main className="min-h-screen pb-8">
-      <div className="bg-gradient-to-b from-white dark:from-slate-900 to-gray-50 dark:to-slate-900 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm dark:shadow-none">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-        <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
-  Telefonlar
-</h1>
-
-{/* Search input */}
-<form action="/phones" className="mb-2">
-  <input
-    name="query"
-    defaultValue={query}
-    autoFocus={focus}
-    placeholder={
-      focus
-        ? 'Masalan: iPhone 13, Samsung A12'
-        : 'Qidirish yoki filtrlash'
-    }
-    className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500"
-  />
-  {brand && (
-    <input type="hidden" name="brand" value={brand} />
-  )}
-</form>
-
-          {/* Brand filter */}
-          <div className="flex gap-1 flex-wrap">
-            <a
-              href="/phones"
-              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
-                !brand 
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm dark:shadow-none' 
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-              }`}
-            >
-              Barchasi
-            </a>
-            <a
-              href="/phones?brand=Apple"
-              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
-                brand === 'Apple'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm dark:shadow-none'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-              }`}
-            >
-              Apple
-            </a>
-            <a
-              href="/phones?brand=Samsung"
-              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
-                brand === 'Samsung'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm dark:shadow-none'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-              }`}
-            >
-              Samsung
-            </a>
-            <a
-              href="/phones?brand=Xiaomi"
-              className={`px-2 py-1 border rounded-xl text-xs font-medium transition-all ${
-                brand === 'Xiaomi'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm dark:shadow-none'
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-              }`}
-            >
-              Xiaomi
-            </a>
-          </div>
-        </div>
+    <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pb-24">
+      {/* STICKY TOOLBAR */}
+      <div className="sticky top-0 z-30 bg-white dark:bg-slate-900 border-b">
+        <PhonesToolbar />
+        <ActiveFilters />
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pt-6">
+      {/* RESULTS */}
+      <div className="max-w-2xl mx-auto px-4 pt-4">
         {products?.length === 0 && (
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl p-12 text-center shadow-sm dark:shadow-none">
-            <p className="text-gray-500 dark:text-gray-400 text-base">Natija topilmadi</p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Boshqa so&apos;rov bilan qayta urinib ko&apos;ring</p>
-          </div>
-        )}
-
-        {products && products.length > 0 && (
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Narx bo&apos;yicha tartiblangan
-            </h2>
-            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-              {products.length} ta
-            </span>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-10 text-center text-gray-500">
+            Natija topilmadi
           </div>
         )}
 
         <ul className="space-y-3">
-          {products?.map((product) => {
-            const shop = Array.isArray(product.shop) ? product.shop[0] : product.shop;
-            const imageUrl = Array.isArray(product.product_images) && product.product_images[0] 
-              ? product.product_images[0].image_url 
-              : undefined;
-            const roomCode = shop?.room ? (Array.isArray(shop.room) ? shop.room[0]?.code : (shop.room as any)?.code) : undefined;
+          {products?.map(p => {
+            const shop = Array.isArray(p.shop) ? p.shop[0] : p.shop;
+            const room = Array.isArray(shop.room) ? shop.room[0] : shop.room;
+            const imageUrl = p.product_images?.[0]?.image_url;
+
             return (
               <PhoneCard
-                key={product.id}
-                id={product.id}
-                slug={product.slug || product.id}
-                liked={favoriteProductIds.has(product.id)}
-                brand={product.brand}
-                model={product.model}
-                storage_gb={product.storage_gb}
-                price_uzs={product.price_uzs}
-                updated_at={product.updated_at}
+                key={p.id}
+                id={p.id}
+                slug={p.slug}
+                brand={p.brand}
+                model={p.model}
+                storage_gb={p.storage_gb}
+                price_uzs={p.price_uzs}
+                updated_at={p.updated_at}
                 shopName={shop.name}
-                roomCode={roomCode}  
+                roomCode={room?.code}
                 imageUrl={imageUrl}
-                // variant="list"
+                liked={favoriteIds.has(p.id)}
+                variant="list"
               />
             );
           })}

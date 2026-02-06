@@ -36,7 +36,7 @@ export default function FilterSheet({
     if (storage) q.set('storage', storage);
     if (sort) q.set('sort', sort);
 
-    router.push(`/?${q.toString()}`);
+    router.push(`/phones?${q.toString()}`);
     onClose();
   }
 

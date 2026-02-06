@@ -4,7 +4,9 @@ import { publicSupabase } from '@/lib/supabase/public';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
 
-  // 1️⃣ Fetch active products
+  /* ======================
+     PRODUCTS
+  ====================== */
   const { data: products } = await publicSupabase
     .from('products')
     .select('slug, updated_at')
@@ -12,15 +14,57 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .not('slug', 'is', null);
 
   const productUrls =
-    products?.map((product) => ({
-      url: `${siteUrl}/phones/${product.slug}`,
-      lastModified: product.updated_at
-        ? new Date(product.updated_at)
-        : new Date(),
+    products?.map((p) => ({
+      url: `${siteUrl}/phones/${p.slug}`,
+      lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9,
     })) ?? [];
 
+  /* ======================
+     ROOMS
+  ====================== */
+  const { data: rooms } = await publicSupabase
+    .from('rooms')
+    .select('code')
+    .eq('is_active', true);
+
+  const roomUrls =
+    rooms?.map((r) => ({
+      url: `${siteUrl}/${r.code}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })) ?? [];
+
+  /* ======================
+     SHOPS
+  ====================== */
+  const { data: shops } = await publicSupabase
+    .from('shops')
+    .select(`
+      slug,
+      rooms ( code )
+    `)
+    .eq('is_active', true);
+
+  const shopUrls =
+    shops?.flatMap((shop: any) =>
+      shop.rooms
+        ? [
+            {
+              url: `${siteUrl}/${shop.rooms.code}/${shop.slug}`,
+              lastModified: new Date(),
+              changeFrequency: 'weekly' as const,
+              priority: 0.8,
+            },
+          ]
+        : []
+    ) ?? [];
+
+  /* ======================
+     RETURN ALL
+  ====================== */
   return [
     // 🏠 Homepage
     {
@@ -38,7 +82,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
 
-    // 📦 Product pages
+    // 🧱 Rooms
+    ...roomUrls,
+
+    // 🏪 Shops
+    ...shopUrls,
+
+    // 📦 Products
     ...productUrls,
   ];
 }

@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { publicSupabase } from '@/lib/supabase/public';
 import { PhoneCard } from '@/components/PhoneCard';
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
+import { supabaseService } from '@/lib/supabase/service';
 
 type Props = {
   params: {
@@ -60,6 +62,19 @@ export default async function ShopPublicPage({ params }: Props) {
     .eq('shop_id', shop.id)
     .eq('is_active', true)
     .order('price_uzs', { ascending: true });
+
+    const user = await getCurrentUser();
+
+    const favoriteIds = new Set<string>();
+
+if (user) {
+  const { data } = await supabaseService
+    .from('favorites')
+    .select('product_id')
+    .eq('user_id', user.id);
+
+  data?.forEach(f => favoriteIds.add(f.product_id));
+}
 
   return (
     <main className="max-w-2xl mx-auto px-4 pb-24 space-y-6">
@@ -122,6 +137,7 @@ export default async function ShopPublicPage({ params }: Props) {
                 shopName={shop.name}
                 roomCode={room?.code}
                 imageUrl={imageUrl}
+                liked={favoriteIds.has(p.id)} 
               />
             );
           })}
