@@ -1,54 +1,130 @@
-# Malika Bazar
+# Tezku — Malika bozor telefon narxlari
 
-MVP web application for comparing phone prices from Malika market.
+Toshkentdagi Malika bozori telefon do'konlari uchun narx aggregatori. Xaridorlar narxlarni solishtirib ko'radi, sotuvchilar o'z do'konini va mahsulotlarini boshqaradi.
 
-## Tech Stack
+## Texnologiyalar
 
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Supabase (auth + database)
-- Deployed on Vercel
+| Qatlam | Stack |
+|--------|-------|
+| Framework | Next.js 16 (App Router, React 19) |
+| Styling | Tailwind CSS v4 |
+| Database | Supabase (PostgreSQL + PostgREST) |
+| Auth | Telegram OTP (xaridorlar) · Admin panel (sotuvchilar) |
+| Rasmlar | Cloudinary (WebP auto-convert) |
+| Notifications | Telegram Bot API |
+| PWA | Service Worker · Web App Manifest |
 
-## Setup
+## Asosiy imkoniyatlar
 
-1. Install dependencies:
-```bash
-npm install
+**Xaridorlar**
+- Telefon qidirish, brand va narx bo'yicha filtrlash
+- Cursor-based pagination (infinite scroll)
+- Sevimlilar ro'yxati
+- Telegram OTP orqali kirish
+- Profil tahrirlash (ism, rasm)
+
+**Sotuvchilar**
+- Do'kon sahifasi (banner, avatar, lokatsiya, tavsif)
+- Mahsulot qo'shish / tahrirlash / o'chirish
+- Dashboard: statistika, so'nggi faollik
+
+**Admin**
+- Sotuvchilarni boshqarish (qo'shish, bloklash, o'chirish)
+- Mahsulotlar moderatsiyasi
+- Do'kon ma'lumotlarini tahrirlash
+
+**Umumiy**
+- PWA — mobil va desktopda o'rnatish imkoni
+- Support forma (Telegram orqali)
+- Dark mode
+
+## Loyiha tuzilmasi
+
+```
+src/
+├── app/
+│   ├── (public)/        # Marketplace, telefon sahifalari, profil
+│   ├── (seller)/        # Sotuvchi paneli
+│   ├── (admin)/         # Admin panel
+│   ├── (auth)/          # Login sahifalari
+│   ├── api/             # Route handlers
+│   ├── manifest.ts      # PWA manifest
+│   └── layout.tsx
+├── actions/             # Server Actions
+├── components/
+│   ├── admin/
+│   ├── layout/
+│   ├── product/
+│   ├── profile/
+│   ├── seller/
+│   └── support/
+└── lib/
+    ├── db/              # DB query funksiyalari
+    ├── supabase/        # Supabase client
+    ├── auth.ts
+    ├── format.ts
+    └── user-session.ts
 ```
 
-2. Copy `.env.local.example` to `.env.local` and fill in your Supabase credentials.
+## Local ishga tushirish
 
-3. Run development server:
 ```bash
-npm run dev
+pnpm install
+cp .env.example .env.local
+# .env.local ni to'ldiring (quyiga qarang)
+pnpm dev
 ```
 
-## Database Schema
+## Environment o'zgaruvchilari
 
-### SHOPS
-- id
-- name
-<!-- - shop_number (required, unique) -->
-- phone_number
-- telegram_username
-- created_at
-- is_active
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-### PRODUCTS
-- id
-- shop_id
-- brand
-- model
-- storage_gb
-- condition (new/used)
-- price_uzs (required)
-- is_active
-- created_at
-- updated_at
+# Cloudinary
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_UPLOAD_PRESET=
 
-### PRODUCT_IMAGES (optional)
-- id
-- product_id
-- image_url
-- order
+# Telegram — asosiy bot (OTP auth)
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_BOT_USERNAME=
+NEXT_PUBLIC_TELEGRAM_BOT_USERNAME=
+
+# Telegram — support bot
+SUPPORT_BOT_TOKEN=
+SUPPORT_CHAT_ID=
+
+# Admin
+ADMIN_USERNAME=
+ADMIN_PASSWORD=
+ADMIN_SESSION_SECRET=
+
+# App
+NEXT_PUBLIC_APP_URL=https://tezku.uz
+```
+
+## Database
+
+```bash
+# Supabase SQL Editor da ishga tushiring:
+schema_final.sql   # To'liq sxema (bir martalik)
+```
+
+Webhook sozlash (Telegram bot uchun):
+
+```
+/api/telegram/set-webhook   # POST — admin panelidan yoki to'g'ridan-to'g'ri
+```
+
+## Build & Deploy
+
+```bash
+pnpm build
+pnpm start
+```
+
+Vercel yoki boshqa Node.js hostingga deploy qilinadi. `NEXT_PUBLIC_APP_URL` ni production URL ga o'zgartiring.
