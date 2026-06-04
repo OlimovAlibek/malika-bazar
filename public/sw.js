@@ -1,11 +1,19 @@
-const CACHE = 'tezku-v3'
+const CACHE = 'tezku-v4'
 const OFFLINE_URL = '/offline'
+const NAV_TIMEOUT_MS = 5000
 
-// Faqat offline sahifani precache qilamiz — SSR sahifalar keshlanmaydi
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('sw-timeout')), ms))
+  ])
+}
+
+// Offline sahifa + bosh sahifani precache qilamiz
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.add(OFFLINE_URL))
+      .then(c => c.addAll([OFFLINE_URL, '/']))
       .then(() => self.skipWaiting())
   )
 })
@@ -63,10 +71,10 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  // HTML sahifalar: network-first, xatolikda offline page
+  // HTML sahifalar: network-first + timeout, xatolikda kesh yoki offline page
   if (request.destination === 'document' || request.headers.get('accept')?.includes('text/html')) {
     e.respondWith(
-      fetch(request)
+      withTimeout(fetch(request), NAV_TIMEOUT_MS)
         .then(res => {
           if (res.ok) {
             caches.open(CACHE).then(c => c.put(request, res.clone()))
@@ -76,6 +84,9 @@ self.addEventListener('fetch', (e) => {
         .catch(async () => {
           const cached = await caches.match(request)
           if (cached) return cached
+          // Asosiy sahifa uchun '/' ni ham tekshiramiz
+          const root = await caches.match('/')
+          if (root) return root
           const offline = await caches.match(OFFLINE_URL)
           return offline ?? new Response('Offline', { status: 503 })
         })
