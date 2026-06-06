@@ -3,9 +3,9 @@ import type { ProductCard, Condition } from '@/types'
 
 export type ShopListItem = {
   id: string
-  name: string
+  name: string | null
   slug: string
-  room_code: string
+  room_code: string | null
   phone: string | null
   telegram_username: string | null
   is_active: boolean
@@ -55,14 +55,19 @@ function rowToCard(row: ProductRow): ProductCard {
 const SHOP_COLS = 'id,name,slug,room_code,phone,telegram_username,is_active,banner_url,avatar_url,description,products_count'
 
 export async function getShops(): Promise<ShopListItem[]> {
-  const { data, error } = await serviceClient
-    .from('v_shops')
-    .select(SHOP_COLS)
-    .eq('is_active', true)
-    .order('name', { ascending: true })
+  try {
+    const { data, error } = await serviceClient
+      .from('v_shops')
+      .select(SHOP_COLS)
+      .eq('is_active', true)
+      .order('name', { ascending: true })
 
-  if (error) { console.error('getShops:', error.message); return [] }
-  return (data ?? []) as ShopListItem[]
+    if (error) { console.error('getShops:', error.message); return [] }
+    return (data ?? []) as ShopListItem[]
+  } catch (e) {
+    console.error('getShops network error:', e)
+    return []
+  }
 }
 
 export async function getShopBySlug(slug: string): Promise<ShopListItem | null> {

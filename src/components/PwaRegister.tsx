@@ -14,8 +14,8 @@ export function PwaRegister() {
   const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
-    // SW ro'yxatdan o'tkazish
-    if ('serviceWorker' in navigator) {
+    // SW faqat production da
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {})
     }
 

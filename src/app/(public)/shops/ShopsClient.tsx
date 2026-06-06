@@ -10,11 +10,13 @@ type Props = { shops: ShopListItem[] }
 export default function ShopsClient({ shops }: Props) {
   const [q, setQ] = useState('')
 
-  const filtered = shops.filter(s =>
-    q === '' ||
-    s.name.toLowerCase().includes(q.toLowerCase()) ||
-    s.room_code.toLowerCase().includes(q.toLowerCase())
-  )
+  const lq = q.toLowerCase()
+  const filtered = shops.filter(s => {
+    if (q === '') return true
+    const name = s.name ? s.name.toLowerCase() : ''
+    const code = s.room_code ? s.room_code.toLowerCase() : ''
+    return name.includes(lq) || code.includes(lq)
+  })
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#0A0A0F] pb-28">
@@ -92,7 +94,7 @@ function ShopCard({ shop }: { shop: ShopListItem }) {
         {shop.banner_url ? (
           <Image
             src={shop.banner_url}
-            alt={shop.name}
+            alt={shop.name ?? ''}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
