@@ -1,4 +1,4 @@
-const CACHE = 'tezku-v4'
+const CACHE = 'tezku-v5'
 const OFFLINE_URL = '/offline'
 const NAV_TIMEOUT_MS = 5000
 
@@ -84,9 +84,6 @@ self.addEventListener('fetch', (e) => {
         .catch(async () => {
           const cached = await caches.match(request)
           if (cached) return cached
-          // Asosiy sahifa uchun '/' ni ham tekshiramiz
-          const root = await caches.match('/')
-          if (root) return root
           const offline = await caches.match(OFFLINE_URL)
           return offline ?? new Response('Offline', { status: 503 })
         })
