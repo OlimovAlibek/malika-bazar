@@ -27,13 +27,13 @@ function formatPhone(raw: string): string | null {
   const digits = raw.replace(/\D/g, '')
   if (!digits) return null
   // 9 digits → uzbek local (e.g. 901234567)
-  if (digits.length === 9) return +998${digits}
+  if (digits.length === 9) return `+998${digits}`
   // 12 digits starting with 998
-  if (digits.length === 12 && digits.startsWith('998')) return +${digits}
+  if (digits.length === 12 && digits.startsWith('998')) return `+${digits}`
   // already has +998 prefix (13 chars)
-  if (digits.length === 13 && digits.startsWith('998')) return +${digits}
+  if (digits.length === 13 && digits.startsWith('998')) return `+${digits}`
   // fallback: keep as-is with + prefix if it looks like an intl number
-  return digits.length >= 7 ? +${digits} : null
+  return digits.length >= 7 ? `+${digits}` : null
 }
 
 export async function updateShopInfo(data: {

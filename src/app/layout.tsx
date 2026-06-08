@@ -1,13 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/PwaRegister";
 
-const geist = localFont({
-  src: [
-    { path: "../../public/fonts/geist-latin.woff2", weight: "100 900" },
-    { path: "../../public/fonts/geist-latin-ext.woff2", weight: "100 900" },
-  ],
+const geist = Geist({
+  subsets: ["latin"],
   variable: "--font-geist-sans",
 });
 

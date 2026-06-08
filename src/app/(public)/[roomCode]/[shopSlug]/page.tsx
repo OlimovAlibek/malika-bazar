@@ -21,7 +21,7 @@ export default async function ShopPage({ params }: Props) {
     getShopProducts(shopSlug),
   ])
 
-  if (!shop || shop.room_code.toLowerCase() !== roomCode.toLowerCase()) notFound()
+  if (!shop || (shop.room_code ?? '').toLowerCase() !== roomCode.toLowerCase()) notFound()
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-[#0A0A0F] pb-28">
@@ -50,8 +50,8 @@ export default async function ShopPage({ params }: Props) {
 
         {shop.banner_url ? (
           <Image
-            src={shop.banner_url}
-            alt={shop.name}
+            src={shop.banner_url!}
+            alt={shop.name ?? ''}
             fill
             sizes="100vw"
             className="object-cover object-center"
