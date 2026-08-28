@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { PwaRegister } from "@/components/PwaRegister";
 
@@ -14,23 +15,47 @@ export const metadata: Metadata = {
     template: "%s | Tezku",
   },
   description: "Malika bozorida telefon va smartfonlarning real narxlari.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://tezku.uz"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://tezku.uz"
+  ),
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Tezku",
   },
-  formatDetection: { telephone: false },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
-      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192.png",   sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png",   sizes: "512x512", type: "image/png" },
+      {
+        url: "/icons/favicon-16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/icons/favicon-32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
     ],
     apple: [
-      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      {
+        url: "/icons/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
   },
 };
@@ -49,10 +74,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="uz" className={geist.variable} suppressHydrationWarning>
+    <html
+      lang="uz"
+      className={geist.variable}
+      suppressHydrationWarning
+    >
       <body className="min-h-dvh bg-[#F5F5F5] dark:bg-[#0A0A0F] text-gray-900 dark:text-gray-100 antialiased">
         {children}
         <PwaRegister />
+
+        <Script
+          src="https://mitrex-zeta.vercel.app/api/track.js"
+          data-site="cmtcw56eu0000onqdgnacuk9f"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
